@@ -1,0 +1,2790 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e7">
+<meta name="description" content="Assistant personnel de gestion du Hifz du Coran avec répétition espacée (SRS), repères de versets et planification">
+<title>Hifz — Mon suivi du Coran</title>
+<style>
+:root {
+  --bg: #f5f0e7;
+  --paper: #fffdf8;
+  --ink: #34291f;
+  --muted: #7d7063;
+  --line: #e5dac9;
+  --brown: #76543b;
+  --brown2: #553a29;
+  --gold: #b28a4e;
+  --soft: #eee4d5;
+  --green: #54745a;
+  --green-bg: #e2efe4;
+  --gold-bg: #f7ebd4;
+  --brown-bg: #ede0d4;
+  --red: #a65348;
+  --red-bg: #f6dedb;
+  --shadow: 0 10px 28px #49321b12;
+}
+
+[data-theme="dark"] {
+  --bg: #211d19;
+  --paper: #2c2621;
+  --ink: #f4eadc;
+  --muted: #b9a998;
+  --line: #493d32;
+  --brown: #c29b70;
+  --brown2: #e0c29b;
+  --gold: #d2ad70;
+  --soft: #3c322a;
+  --green: #9dbb9c;
+  --green-bg: #27382a;
+  --gold-bg: #413521;
+  --brown-bg: #3c2f25;
+  --red: #e19a8d;
+  --red-bg: #442824;
+  --shadow: 0 10px 30px #0006;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+
+.app { max-width: 1040px; margin: 0 auto; padding: 16px 14px 104px; }
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 4px 0 16px;
+}
+.brand { display: flex; align-items: center; gap: 11px; }
+.mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--brown2);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 23px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+[data-theme="dark"] .mark { color: #211d19; }
+.brand h1 { font-size: 20px; margin: 0; letter-spacing: .2px; }
+.brand small { color: var(--muted); display: block; font-size: 12px; }
+
+.iconbtn, .btn {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 14px;
+  min-height: 42px;
+  transition: transform .1s ease, background-color .15s ease;
+}
+.iconbtn:active, .btn:active { transform: scale(.98); }
+.btn.primary {
+  background: var(--brown2);
+  color: #fff;
+  border-color: var(--brown2);
+  font-weight: 600;
+}
+[data-theme="dark"] .btn.primary { color: #211d19; }
+.btn.soft { background: var(--soft); border-color: transparent; font-weight: 500; }
+.btn.danger {
+  color: var(--red);
+  border-color: #e3b8b0;
+  background: var(--red-bg);
+  font-weight: 600;
+}
+.btn.sm { padding: 7px 11px; min-height: 36px; font-size: 12px; border-radius: 10px; }
+
+.nav {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 0 14px;
+  scrollbar-width: none;
+}
+.nav::-webkit-scrollbar { display: none; }
+.nav button {
+  white-space: nowrap;
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 15px;
+  min-height: 40px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 500;
+}
+.nav button.active {
+  background: var(--brown2);
+  color: #fff;
+  font-weight: 600;
+}
+[data-theme="dark"] .nav button.active { color: #211d19; }
+
+.page { display: none; }
+.page.active { display: block; animation: fadeIn .16s ease; }
+@keyframes fadeIn { from { opacity: .45; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+
+.hero {
+  background: linear-gradient(130deg, #553a29, #76543b);
+  color: #fff;
+  border-radius: 22px;
+  padding: 20px 22px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.hero h2 { margin: 0 0 4px; font-size: 22px; }
+.hero p { margin: 0; color: #f4e8d8e6; font-size: 14px; }
+
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+.card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  margin-bottom: 12px;
+}
+.card h3 { font-size: 16px; margin: 0 0 10px; }
+.muted { color: var(--muted); }
+.stat { font-size: 22px; font-weight: 700; letter-spacing: -.4px; }
+.statlabel { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.stack { display: flex; flex-direction: column; gap: 9px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 12px; color: var(--muted); font-weight: 650; }
+.field input, .field select {
+  width: 100%;
+  padding: 10px 12px;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--bg);
+  color: var(--ink);
+}
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+
+.task {
+  display: flex;
+  gap: 11px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line);
+  align-items: flex-start;
+}
+.task:last-child { border-bottom: 0; }
+.task input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--brown);
+  margin-top: 2px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.task.done .tasktitle { text-decoration: line-through; color: var(--muted); }
+.tasktitle { font-weight: 650; }
+
+.tag {
+  font-size: 11px;
+  border-radius: 99px;
+  padding: 4px 10px;
+  background: var(--soft);
+  color: var(--brown2);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+.tag.warn { color: var(--red); background: var(--red-bg); }
+.tag.ok { color: var(--green); background: var(--green-bg); }
+.tag.gold { color: #855c18; background: var(--gold-bg); }
+[data-theme="dark"] .tag.gold { color: var(--gold); }
+
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.small { font-size: 12px; }
+.empty { padding: 20px; text-align: center; color: var(--muted); font-size: 14px; }
+
+.pagegrid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; }
+.pg {
+  padding: 8px 0;
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  font-size: 11px;
+  color: var(--ink);
+  font-weight: 500;
+}
+.pg.known { background: var(--green-bg); color: var(--green); border-color: #b8d1bc; font-weight: 700; }
+.pg.learning { background: var(--gold-bg); color: #8a621c; border-color: #e5cfa2; font-weight: 700; }
+[data-theme="dark"] .pg.learning { color: var(--gold); }
+.pg.weak { background: var(--red-bg); color: var(--red); border-color: #e4bab2; font-weight: 700; }
+
+.pillrow { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.pill {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  padding: 7px 12px;
+  min-height: 36px;
+  border-radius: 99px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.pill.on { background: var(--brown2); color: #fff; border-color: var(--brown2); }
+[data-theme="dark"] .pill.on { color: #211d19; }
+.pill.ok { background: var(--green-bg); color: var(--green); border-color: #b5d1ba; }
+.pill.hes { background: var(--gold-bg); color: #855c18; border-color: #e4cb98; }
+[data-theme="dark"] .pill.hes { color: var(--gold); }
+.pill.fail { background: var(--red-bg); color: var(--red); border-color: #e3b8b0; }
+
+.notice {
+  padding: 12px 14px;
+  background: var(--soft);
+  border-radius: 12px;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--brown2);
+  color: #fff;
+  padding: 11px 18px;
+  border-radius: 99px;
+  box-shadow: var(--shadow);
+  display: none;
+  z-index: 50;
+  font-weight: 600;
+  font-size: 13px;
+  text-align: center;
+  max-width: 92vw;
+}
+[data-theme="dark"] .toast { color: #211d19; }
+
+.modalback {
+  position: fixed;
+  inset: 0;
+  background: #0008;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 40;
+}
+.modal {
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 22px 22px 0 0;
+  padding: 20px;
+  width: min(100%, 680px);
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: var(--shadow);
+}
+.modal h3 { margin-top: 0; }
+.close {
+  float: right;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 26px;
+  line-height: 1;
+  padding: 2px 6px;
+}
+
+/* Color code legend & badges */
+.legend { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.leg-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-weight: 600;
+}
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.c-learn { background: var(--brown-bg); color: var(--brown2); border: 1px solid #d4bfa9; }
+.c-learn .dot { background: var(--brown); }
+.c-srs { background: var(--gold-bg); color: #855c18; border: 1px solid #e4cb98; }
+[data-theme="dark"] .c-srs { color: var(--gold); }
+.c-srs .dot { background: var(--gold); }
+.c-old { background: var(--green-bg); color: var(--green); border: 1px solid #b5d1ba; }
+.c-old .dot { background: var(--green); }
+.c-weak { background: var(--red-bg); color: var(--red); border: 1px solid #e3b8b0; }
+.c-weak .dot { background: var(--red); }
+
+.pbadge {
+  display: block;
+  font-size: 10.5px;
+  line-height: 1.25;
+  padding: 3px 6px;
+  border-radius: 6px;
+  margin-top: 4px;
+  text-align: left;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pbadge.learn { background: var(--brown-bg); color: var(--brown2); }
+.pbadge.srs { background: var(--gold-bg); color: #855c18; }
+[data-theme="dark"] .pbadge.srs { color: var(--gold); }
+.pbadge.old { background: var(--green-bg); color: var(--green); }
+.pbadge.weak { background: var(--red-bg); color: var(--red); }
+.pbadge.revtag { background: var(--soft); color: var(--muted); font-size: 9.5px; text-align: center; }
+
+/* Week & Month Planning Grid */
+.weekrow { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 7px; }
+.daycard {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 9px 6px;
+  text-align: center;
+  cursor: pointer;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: border-color .15s ease;
+}
+.daycard:hover { border-color: var(--brown); }
+.daycard .dname { font-size: 11px; color: var(--muted); font-weight: 600; }
+.daycard .dnum { font-weight: 800; font-size: 15px; margin: 2px 0; }
+.daycard .dtime { font-size: 10px; color: var(--muted); margin-top: 6px; }
+.daycard.over { border-color: var(--red); }
+.daycard.today { outline: 2px solid var(--gold); background: var(--bg); }
+.daycard.review { border-style: dashed; border-color: var(--gold); }
+
+.calhead {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 6px;
+  font-weight: 650;
+}
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.calday {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 6px 4px;
+  text-align: center;
+  cursor: pointer;
+  min-width: 0;
+  min-height: 82px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.calday.emptycell { background: transparent; border-color: transparent; cursor: default; }
+.calday .dnum {
+  font-weight: 700;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2px;
+}
+.calday .dnum small { font-size: 9px; color: var(--muted); font-weight: 500; }
+.calday.over { border-color: var(--red); }
+.calday.today { outline: 2px solid var(--gold); background: var(--bg); }
+.calday.review { border-style: dashed; border-color: var(--gold); }
+
+/* Weekday selector */
+.weekday-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+.wday-btn {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 54px;
+  background: var(--bg);
+  color: var(--ink);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 650;
+}
+.wday-btn.learn-on { background: var(--brown-bg); border-color: var(--brown); color: var(--brown2); }
+.wday-btn.rev-only {
+  background: var(--gold-bg);
+  border-color: var(--gold);
+  color: #855c18;
+  border-style: dashed;
+}
+[data-theme="dark"] .wday-btn.rev-only { color: var(--gold); }
+.wday-btn span { font-size: 10px; font-weight: 500; }
+
+/* SRS rule row */
+.srs-rule-row {
+  display: grid;
+  grid-template-columns: 1.5fr .75fr .75fr .95fr auto;
+  gap: 6px;
+  align-items: end;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.srs-rule-row:last-child { border-bottom: 0; }
+.srs-rule-row input, .srs-rule-row select {
+  padding: 8px;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 13px;
+  width: 100%;
+}
+
+.subbox {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+}
+
+@media (max-width: 740px) {
+  .weekrow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .weekday-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .srs-rule-row {
+    grid-template-columns: 1fr 1fr;
+    background: var(--bg);
+    padding: 10px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    border: 1px solid var(--line);
+  }
+  .calday { min-height: 74px; padding: 5px 3px; }
+  .pbadge { font-size: 9.5px; padding: 2px 4px; }
+}
+@media (min-width: 700px) {
+  .modalback { align-items: center; }
+  .modal { border-radius: 22px; }
+  .app { padding-top: 26px; }
+  .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 420px) {
+  .pagegrid { grid-template-columns: repeat(8, 1fr); }
+  .fields { grid-template-columns: 1fr 1fr; }
+  .hero h2 { font-size: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <div class="mark">۞</div>
+      <div>
+        <h1>Hifz</h1>
+        <small>Assistant personnel de mémorisation du Coran</small>
+      </div>
+    </div>
+    <button class="iconbtn" id="themeBtn" aria-label="Basculer entre mode clair et mode sombre" title="Mode clair / sombre">☾</button>
+  </header>
+
+  <nav class="nav" id="nav" aria-label="Navigation principale">
+    <button class="active" data-page="today">Aujourd'hui</button>
+    <button data-page="learn">Apprentissage</button>
+    <button data-page="reviews">Révisions</button>
+    <button data-page="quran">Mon Coran</button>
+    <button data-page="planning">Planning</button>
+    <button data-page="stats">Statistiques</button>
+    <button data-page="settings">Paramètres</button>
+  </nav>
+
+  <main>
+    <!-- 1. AUJOURD'HUI -->
+    <section class="page active" id="today">
+      <div class="hero">
+        <h2>السلام عليكم</h2>
+        <p>Révisions prioritaires d'abord, puis ton objectif quotidien avec repère indicatif de versets.</p>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <div>
+            <h3>Configuration du jour</h3>
+            <div class="muted small" id="todayDate"></div>
+          </div>
+          <span class="tag" id="dayModeTag">Apprentissage autorisé</span>
+        </div>
+
+        <div class="fields" style="margin-top:12px">
+          <div class="field">
+            <label for="available">Temps disponible aujourd'hui (min)</label>
+            <input id="available" type="number" min="0" step="5" value="240">
+          </div>
+          <div class="field">
+            <label for="dayMode">Type de journée</label>
+            <select id="dayMode">
+              <option value="normal">Avec nouvel apprentissage</option>
+              <option value="review">Révisions uniquement</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="fields" style="margin-top:10px">
+          <div class="field">
+            <label for="todayNewTarget">Objectif nouvel apprentissage (pages/jour)</label>
+            <input id="todayNewTarget" type="number" min="0" max="10" step="0.25" value="1">
+          </div>
+          <div class="field">
+            <label for="freeTimePreview">Temps libre conservé</label>
+            <input id="freeTimePreview" type="text" readonly value="Calculé automatiquement">
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" id="recalc">Calculer mon programme</button>
+          <button class="btn soft" data-jump="settings">Jours par défaut & Règles SRS</button>
+        </div>
+      </div>
+
+      <div class="grid" id="todayStats"></div>
+
+      <div class="card">
+        <div class="row">
+          <h3>Programme du jour</h3>
+          <span class="tag" id="planStatus">Prêt</span>
+        </div>
+        <div id="planSummary" class="notice" style="margin-bottom:8px">Calcul en cours...</div>
+        <div id="tasks"></div>
+      </div>
+    </section>
+
+    <!-- 2. APPRENTISSAGE -->
+    <section class="page" id="learn">
+      <div class="hero">
+        <h2>Mon apprentissage</h2>
+        <p>Renseigne tes sourates ou plages de pages, choisis ton découpage et organise l'ordre de mémorisation.</p>
+      </div>
+
+      <div class="card">
+        <h3>Ajouter un passage à apprendre</h3>
+        <div class="field">
+          <label for="passSurah">Sourate (français / arabe)</label>
+          <select id="passSurah"></select>
+        </div>
+        <div class="fields" style="margin-top:10px">
+          <div class="field">
+            <label for="passStart">Page de début</label>
+            <input id="passStart" type="number" min="1" max="604" value="1">
+          </div>
+          <div class="field">
+            <label for="passEnd">Page de fin</label>
+            <input id="passEnd" type="number" min="1" max="604" value="1">
+          </div>
+        </div>
+        <div class="fields" style="margin-top:10px">
+          <div class="field">
+            <label for="passFraction">Découpage par fraction</label>
+            <select id="passFraction">
+              <option value="1">1 page entière</option>
+              <option value="0.5">1/2 page (demi-page)</option>
+              <option value="0.33">1/3 page (tiers)</option>
+              <option value="0.25">1/4 page (quart)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="passPages">Total pages du passage</label>
+            <input id="passPages" type="number" min="1" step="1" value="1" readonly>
+          </div>
+        </div>
+        <p class="muted small" id="surahRange" style="margin:8px 0 0"></p>
+        <p class="muted small" id="verseSlicePreview" style="margin:4px 0 0"></p>
+        <div class="actions">
+          <button class="btn primary" id="addPass">Ajouter à ma liste</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <h3>Ordre de mes passages</h3>
+          <span class="tag" id="passCount">0 passage</span>
+        </div>
+        <div id="passages"></div>
+      </div>
+
+      <div class="card">
+        <h3>Durées de référence</h3>
+        <div class="fields">
+          <div class="field"><label for="prepMin">Préparation (min/page)</label><input id="prepMin" type="number" min="0" value="30"></div>
+          <div class="field"><label for="learnMin">Apprentissage (min/page)</label><input id="learnMin" type="number" min="1" value="60"></div>
+          <div class="field"><label for="repeatMin">Répétition ×10 (min/page)</label><input id="repeatMin" type="number" min="0" value="20"></div>
+          <div class="field"><label for="oldMin">Révision ancien (min/page)</label><input id="oldMin" type="number" min="1" step="1" value="2"></div>
+        </div>
+        <button class="btn soft" id="saveDurations" style="margin-top:12px">Enregistrer les durées</button>
+      </div>
+    </section>
+
+    <!-- 3. RÉVISIONS -->
+    <section class="page" id="reviews">
+      <div class="hero">
+        <h2>Mes révisions</h2>
+        <p>Cycles SRS du nouveau, boucle stricte de l'ancien (Manzil) et consolidation des passages à renforcer.</p>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <h3>Ancien — boucle de révision</h3>
+          <span class="tag ok">Cycle strict</span>
+        </div>
+        <div class="fields">
+          <div class="field"><label for="loopDays">Durée de la boucle (jours)</label><input id="loopDays" type="number" min="1" value="15"></div>
+          <div class="field"><label for="oldTarget">Objectif quotidien (pages entières, 0 = auto)</label><input id="oldTarget" type="number" min="0" step="1" placeholder="Calcul automatique"></div>
+        </div>
+        <div class="actions"><button class="btn soft" id="saveLoop">Enregistrer la boucle</button></div>
+        <p id="oldSummary" class="notice" style="margin-top:10px"></p>
+      </div>
+
+      <div class="card">
+        <h3>Renseigner des pages connues ou à renforcer</h3>
+        <div class="fields">
+          <div class="field"><label for="manualPage">Page début</label><input id="manualPage" type="number" min="1" max="604" placeholder="ex. 1"></div>
+          <div class="field"><label for="manualPageEnd">Page fin (facultatif)</label><input id="manualPageEnd" type="number" min="1" max="604" placeholder="ex. 30"></div>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <label for="manualStatus">Statut et niveau de maîtrise</label>
+          <select id="manualStatus">
+            <option value="known">Ancien — connue (Maîtrise : Solide)</option>
+            <option value="weak">À renforcer / Non maîtrisée (Maîtrise : Fragile)</option>
+            <option value="unlearned">Non apprise</option>
+          </select>
+        </div>
+        <div class="actions"><button class="btn primary" id="addPage">Enregistrer la plage</button></div>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <h3>Répétitions SRS planifiées (Nouveau)</h3>
+          <button class="btn sm soft" data-jump="settings">Modifier règles SRS</button>
+        </div>
+        <div id="srsList"></div>
+      </div>
+
+      <div class="card">
+        <h3>Passages non maîtrisés / à renforcer</h3>
+        <div id="weakList"></div>
+      </div>
+    </section>
+
+    <!-- 4. MON CORAN -->
+    <section class="page" id="quran">
+      <div class="hero">
+        <h2>Mon Coran — 604 pages</h2>
+        <p>Mushaf de Médine (604 pages). Appuie sur une page pour gérer son statut et son niveau de maîtrise.</p>
+      </div>
+
+      <div class="card">
+        <h3>Appliquer un statut à une plage de pages</h3>
+        <div class="fields">
+          <div class="field"><label for="rangeStart">Page début</label><input id="rangeStart" type="number" min="1" max="604" placeholder="ex. 50"></div>
+          <div class="field"><label for="rangeEnd">Page fin</label><input id="rangeEnd" type="number" min="1" max="604" placeholder="ex. 55"></div>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <label for="rangeStatus">Statut à appliquer</label>
+          <select id="rangeStatus">
+            <option value="known">Ancien — connue (Solide)</option>
+            <option value="learning">En apprentissage / Récente (Moyen)</option>
+            <option value="weak">À renforcer / Non maîtrisée (Fragile)</option>
+            <option value="unlearned">Non apprise</option>
+          </select>
+        </div>
+        <div class="actions"><button class="btn primary" id="applyRange">Appliquer à la plage</button></div>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <h3>Carte des 604 pages</h3>
+          <span class="tag" id="quranCount"></span>
+        </div>
+        <div class="legend" style="margin-bottom:12px">
+          <span class="leg-item c-old"><span class="dot"></span>Ancien (Solide)</span>
+          <span class="leg-item c-srs"><span class="dot"></span>En cours / Récente (Moyen)</span>
+          <span class="leg-item c-weak"><span class="dot"></span>À renforcer (Fragile)</span>
+        </div>
+        <div class="pagegrid" id="pageGrid"></div>
+      </div>
+    </section>
+
+    <!-- 5. PLANNING -->
+    <section class="page" id="planning">
+      <div class="hero">
+        <h2>Mon planning</h2>
+        <p>Vue Semaine et Mois avec code couleur par type de travail et saisie directe de ce que tu as réellement fait.</p>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <div class="pillrow">
+            <button class="pill on" id="viewWeek">Semaine</button>
+            <button class="pill" id="viewMonth">Mois</button>
+          </div>
+          <div class="pillrow">
+            <button class="btn sm soft" id="todayPeriod">Aujourd'hui</button>
+            <button class="btn sm soft" data-jump="settings">Jours d'apprentissage</button>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <button class="btn soft" id="prevPeriod">◀ Précédent</button>
+          <strong id="periodLabel" style="text-transform:capitalize;font-size:15px"></strong>
+          <button class="btn soft" id="nextPeriod">Suivant ▶</button>
+        </div>
+
+        <div class="legend">
+          <span class="leg-item c-learn"><span class="dot"></span>Nouvel apprentissage</span>
+          <span class="leg-item c-srs"><span class="dot"></span>Répétition SRS</span>
+          <span class="leg-item c-old"><span class="dot"></span>Révision Ancien</span>
+          <span class="leg-item c-weak"><span class="dot"></span>À renforcer</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row" style="margin-bottom:10px">
+          <h3 id="planningTitle" style="margin:0">Vue Semaine</h3>
+          <span class="small muted">Appuie sur un jour pour voir le détail ou noter ta réalisation</span>
+        </div>
+        <div id="planningBody"></div>
+      </div>
+    </section>
+
+    <!-- 6. STATISTIQUES -->
+    <section class="page" id="stats">
+      <div class="hero">
+        <h2>Objectifs et statistiques</h2>
+        <p>Indicateurs basés uniquement sur les tâches réellement effectuées, sans fausser les objectifs par les reports.</p>
+      </div>
+      <div class="grid" id="statsGrid"></div>
+      <div class="card">
+        <h3>Progression des objectifs & retards</h3>
+        <div id="goalsOverview" class="stack"></div>
+      </div>
+      <div class="card">
+        <h3>Activité récente</h3>
+        <div id="history"></div>
+      </div>
+    </section>
+
+    <!-- 7. PARAMÈTRES -->
+    <section class="page" id="settings">
+      <div class="hero">
+        <h2>Paramètres</h2>
+        <p>Personnalise tes jours d'apprentissage par défaut, ton calendrier SRS et tes sauvegardes.</p>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <h3>1. Jours d'apprentissage par défaut</h3>
+          <span class="tag">Semaine type</span>
+        </div>
+        <p class="muted small" style="margin-top:0">
+          Les jours en <b>Révisions uniquement</b> ne comportent aucun nouvel apprentissage mais conservent les révisions SRS, l'ancien et les passages à renforcer.
+        </p>
+        <div class="weekday-grid" id="weekdayGrid"></div>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <h3>2. Règles SRS & Nombre de répétitions</h3>
+          <button class="btn sm soft" id="resetSrsRules">Réinitialiser par défaut</button>
+        </div>
+        <p class="muted small" style="margin-top:0">
+          Configure les échéances (J+N) et le nombre de répétitions de chaque étape.
+        </p>
+        <div id="srsRulesEditor"></div>
+        <div class="actions">
+          <button class="btn soft" id="addSrsRule">+ Ajouter une étape</button>
+          <button class="btn primary" id="saveSrsRules">Enregistrer les règles SRS</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>3. Objectifs et temps par défaut</h3>
+        <div class="fields">
+          <div class="field"><label for="defaultTime">Temps quotidien de référence (min)</label><input id="defaultTime" type="number" min="0" value="240"></div>
+          <div class="field"><label for="newTarget">Objectif nouveau (pages/jour)</label><input id="newTarget" type="number" min="0" max="10" step="0.25" value="1"></div>
+        </div>
+        <div class="fields" style="margin-top:10px">
+          <div class="field"><label for="weeklyGoalPages">Objectif hebdomadaire (pages)</label><input id="weeklyGoalPages" type="number" min="0" step="0.5" value="7"></div>
+          <div class="field"><label for="monthlyGoalPages">Objectif mensuel (pages)</label><input id="monthlyGoalPages" type="number" min="0" step="1" value="30"></div>
+        </div>
+        <div class="actions">
+          <button class="btn primary" id="saveGeneral">Enregistrer</button>
+          <button class="btn soft" id="missDay">Décaler les échéances d'1 jour (journée manquée)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>4. Sauvegarde et restauration</h3>
+        <p class="muted small" id="backupInfo" style="margin-top:0"></p>
+        <div class="actions">
+          <button class="btn primary" id="exportData">Exporter mes données (JSON)</button>
+          <label class="btn soft" for="importFile">Importer une sauvegarde</label>
+          <input id="importFile" type="file" accept="application/json" hidden>
+        </div>
+        <div class="actions">
+          <button class="btn danger" id="resetData">Réinitialiser toutes les données</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modalback" id="modal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <button class="close" id="closeModal" aria-label="Fermer">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+// =========================================================================
+// 1. DONNÉES DU MUSHAF DE MÉDINE (114 SOURATES, VERSETS TOTAUX, PAGE DÉBUT)
+// =========================================================================
+const KEY = 'hifz_app_v2';
+
+// [num, nomFr, nomAr, pageDebut, totalVersets]
+const SURAH = [
+  [1,"Al-Fatiha","الفاتحة",1,7],[2,"Al-Baqarah","البقرة",2,286],[3,"Ali 'Imran","آل عمران",50,200],
+  [4,"An-Nisa","النساء",77,176],[5,"Al-Ma'idah","المائدة",106,120],[6,"Al-An'am","الأنعام",128,165],
+  [7,"Al-A'raf","الأعراف",151,206],[8,"Al-Anfal","الأنفال",177,75],[9,"At-Tawbah","التوبة",187,129],
+  [10,"Yunus","يونس",208,109],[11,"Hud","هود",221,123],[12,"Yusuf","يوسف",235,111],
+  [13,"Ar-Ra'd","الرعد",249,43],[14,"Ibrahim","إبراهيم",255,52],[15,"Al-Hijr","الحجر",262,99],
+  [16,"An-Nahl","النحل",267,128],[17,"Al-Isra","الإسراء",282,111],[18,"Al-Kahf","الكهف",293,110],
+  [19,"Maryam","مريم",305,98],[20,"Taha","طه",312,135],[21,"Al-Anbiya","الأنبياء",322,112],
+  [22,"Al-Hajj","الحج",332,78],[23,"Al-Mu'minun","المؤمنون",342,118],[24,"An-Nur","النور",350,64],
+  [25,"Al-Furqan","الفرقان",359,77],[26,"Ash-Shu'ara","الشعراء",367,227],[27,"An-Naml","النمل",377,93],
+  [28,"Al-Qasas","القصص",385,88],[29,"Al-'Ankabut","العنكبوت",397,69],[30,"Ar-Rum","الروم",404,60],
+  [31,"Luqman","لقمان",411,34],[32,"As-Sajdah","السجدة",415,30],[33,"Al-Ahzab","الأحزاب",418,73],
+  [34,"Saba","سبأ",428,54],[35,"Fatir","فاطر",435,45],[36,"Ya-Sin","يس",440,83],
+  [37,"As-Saffat","الصافات",446,182],[38,"Sad","ص",452,88],[39,"Az-Zumar","الزمر",458,75],
+  [40,"Ghafir","غافر",467,85],[41,"Fussilat","فصلت",477,54],[42,"Ash-Shura","الشورى",483,53],
+  [43,"Az-Zukhruf","الزخرف",489,89],[44,"Ad-Dukhan","الدخان",496,59],[45,"Al-Jathiyah","الجاثية",499,37],
+  [46,"Al-Ahqaf","الأحقاف",502,35],[47,"Muhammad","محمد",507,38],[48,"Al-Fath","الفتح",511,29],
+  [49,"Al-Hujurat","الحجرات",515,18],[50,"Qaf","ق",518,45],[51,"Adh-Dhariyat","الذاريات",520,60],
+  [52,"At-Tur","الطور",523,49],[53,"An-Najm","النجم",526,62],[54,"Al-Qamar","القمر",528,55],
+  [55,"Ar-Rahman","الرحمن",531,78],[56,"Al-Waqi'ah","الواقعة",534,96],[57,"Al-Hadid","الحديد",537,29],
+  [58,"Al-Mujadila","المجادلة",542,22],[59,"Al-Hashr","الحشر",545,24],[60,"Al-Mumtahanah","الممتحنة",549,13],
+  [61,"As-Saff","الصف",551,14],[62,"Al-Jumu'ah","الجمعة",553,11],[63,"Al-Munafiqun","المنافقون",554,11],
+  [64,"At-Taghabun","التغابن",556,18],[65,"At-Talaq","الطلاق",558,12],[66,"At-Tahrim","التحريم",560,12],
+  [67,"Al-Mulk","الملك",562,30],[68,"Al-Qalam","القلم",564,52],[69,"Al-Haqqah","الحاقة",566,52],
+  [70,"Al-Ma'arij","المعارج",568,44],[71,"Nuh","نوح",570,28],[72,"Al-Jinn","الجن",572,28],
+  [73,"Al-Muzzammil","المزمل",574,20],[74,"Al-Muddaththir","المدثر",575,56],[75,"Al-Qiyamah","القيامة",577,40],
+  [76,"Al-Insan","الإنسان",578,31],[77,"Al-Mursalat","المرسلات",580,50],[78,"An-Naba","النبأ",582,40],
+  [79,"An-Nazi'at","النازعات",583,46],[80,"'Abasa","عبس",584,42],[81,"At-Takwir","التكوير",585,29],
+  [82,"Al-Infitar","الانفطار",586,19],[83,"Al-Mutaffifin","المطففين",587,36],[84,"Al-Inshiqaq","الانشقاق",588,25],
+  [85,"Al-Buruj","البروج",589,22],[86,"At-Tariq","الطارق",590,17],[87,"Al-A'la","الأعلى",591,19],
+  [88,"Al-Ghashiyah","الغاشية",592,26],[89,"Al-Fajr","الفجر",593,30],[90,"Al-Balad","البلد",594,20],
+  [91,"Ash-Shams","الشمس",594,15],[92,"Al-Layl","الليل",595,21],[93,"Ad-Duha","الضحى",595,11],
+  [94,"Ash-Sharh","الشرح",596,8],[95,"At-Tin","التين",596,8],[96,"Al-'Alaq","العلق",596,19],
+  [97,"Al-Qadr","القدر",597,5],[98,"Al-Bayinah","البينة",597,8],[99,"Az-Zalzalah","الزلزلة",598,8],
+  [100,"Al-'Adiyat","العاديات",598,11],[101,"Al-Qari'ah","القارعة",599,11],[102,"At-Takathur","التكاثر",600,8],
+  [103,"Al-'Asr","العصر",601,3],[104,"Al-Humazah","الهمزة",601,9],[105,"Al-Fil","الفيل",601,5],
+  [106,"Quraysh","قريش",602,4],[107,"Al-Ma'un","الماعون",602,7],[108,"Al-Kawthar","الكوثر",602,3],
+  [109,"Al-Kafirun","الكافرون",603,6],[110,"An-Nasr","النصر",603,3],[111,"Al-Masad","المسد",603,5],
+  [112,"Al-Ikhlas","الإخلاص",604,4],[113,"Al-Falaq","الفلق",604,5],[114,"An-Nas","الناس",604,6]
+];
+
+const DEFAULT_SRS_RULES = [
+  { id: 'r0', label: 'J0 soir', offset: 0, reps: 10, kind: 'repeat' },
+  { id: 'r1m', label: 'J1 matin', offset: 1, reps: 10, kind: 'repeat' },
+  { id: 'r1s', label: 'J1 soir', offset: 1, reps: 10, kind: 'repeat' },
+  { id: 'r2', label: 'J2', offset: 2, reps: 5, kind: 'repeat' },
+  { id: 'r3', label: 'J3', offset: 3, reps: 4, kind: 'repeat' },
+  { id: 'r4', label: 'J4', offset: 4, reps: 2, kind: 'repeat' },
+  { id: 'r5', label: 'J5', offset: 5, reps: 2, kind: 'repeat' },
+  { id: 'r6', label: 'J6', offset: 6, reps: 2, kind: 'repeat' },
+  { id: 'r7', label: 'J7', offset: 7, reps: 2, kind: 'repeat' },
+  { id: 'r8', label: 'J8', offset: 8, reps: 2, kind: 'repeat' },
+  { id: 'r9', label: 'J9', offset: 9, reps: 2, kind: 'repeat' },
+  { id: 'r10', label: 'J10', offset: 10, reps: 2, kind: 'repeat' },
+  { id: 'r12', label: 'J12 contrôle', offset: 12, reps: 1, kind: 'check' },
+  { id: 'r15', label: 'J15 test', offset: 15, reps: 1, kind: 'final' }
+];
+
+// JS getDay(): 0 = Dimanche, 1 = Lundi ... 6 = Samedi
+const WEEKDAYS_META = [
+  { idx: 1, short: 'Lun', name: 'Lundi' },
+  { idx: 2, short: 'Mar', name: 'Mardi' },
+  { idx: 3, short: 'Mer', name: 'Mercredi' },
+  { idx: 4, short: 'Jeu', name: 'Jeudi' },
+  { idx: 5, short: 'Ven', name: 'Vendredi' },
+  { idx: 6, short: 'Sam', name: 'Samedi' },
+  { idx: 0, short: 'Dim', name: 'Dimanche' }
+];
+
+// =========================================================================
+// 2. ESTIMATION INDICATIVE DES VERSETS PAR FRACTION (1/4, 1/3, 1/2, 1 PAGE)
+// =========================================================================
+function surahRange(n) {
+  const idx = SURAH.findIndex(s => s[0] === n);
+  const start = SURAH[idx][3];
+  const end = idx < SURAH.length - 1 ? SURAH[idx + 1][3] - 1 : 604;
+  return [start, Math.max(start, end)];
+}
+
+function surahByPage(p) {
+  for (let i = SURAH.length - 1; i >= 0; i--) {
+    if (p >= SURAH[i][3]) return SURAH[i];
+  }
+  return SURAH[0];
+}
+
+function surahNameByPage(p) {
+  return surahByPage(p)[1];
+}
+
+// Calcule un repère indicatif de versets ("env. v. X–Y") sur une page et une fraction donnée
+function estimateVerseHint(pageNum, fraction, partIndex = 0) {
+  const p = Math.max(1, Math.min(604, Number(pageNum) || 1));
+  const frac = Math.max(0.1, Math.min(1, Number(fraction) || 1));
+  const s = surahByPage(p);
+  const [sStartPage, sEndPage] = surahRange(s[0]);
+  const totalAyat = s[4];
+  const spanPages = Math.max(1, sEndPage - sStartPage + 1);
+  const pageOffset = Math.max(0, p - sStartPage);
+
+  // Part des versets de la sourate correspondant à cette page
+  const pageAyatStart = Math.max(1, Math.floor((pageOffset / spanPages) * totalAyat) + 1);
+  const pageAyatEnd = Math.max(pageAyatStart, Math.min(totalAyat, Math.round(((pageOffset + 1) / spanPages) * totalAyat)));
+  const pageAyatCount = Math.max(1, pageAyatEnd - pageAyatStart + 1);
+
+  const slots = Math.max(1, Math.round(1 / frac));
+  const slotIdx = Math.max(0, Math.min(slots - 1, partIndex % slots));
+
+  const vStart = Math.min(pageAyatEnd, pageAyatStart + Math.floor((slotIdx / slots) * pageAyatCount));
+  const vEnd = slotIdx === slots - 1
+    ? pageAyatEnd
+    : Math.max(vStart, Math.min(pageAyatEnd, pageAyatStart + Math.floor(((slotIdx + 1) / slots) * pageAyatCount) - 1));
+
+  if (frac >= 0.99) {
+    return `${s[1]} · env. v. ${pageAyatStart}–${pageAyatEnd}`;
+  }
+  return `${s[1]} · env. v. ${vStart}–${vEnd}`;
+}
+
+function formatFractionLabel(frac) {
+  if (Math.abs(frac - 0.25) < 0.03) return '1/4 page';
+  if (Math.abs(frac - 0.33) < 0.04) return '1/3 page';
+  if (Math.abs(frac - 0.5) < 0.03) return '1/2 page';
+  return `${Math.round(frac * 100) / 100} page`;
+}
+
+// =========================================================================
+// 3. ÉTAT, STOCKAGE LOCAL ET PROTECTION DES DONNÉES
+// =========================================================================
+const defaults = () => ({
+  version: 2,
+  settings: {
+    defaultTime: 240,
+    newTarget: 1,
+    weeklyGoalPages: 7,
+    monthlyGoalPages: 30,
+    prepMin: 30,
+    learnMin: 60,
+    repeatMin: 20,
+    oldMin: 2,
+    loopDays: 15,
+    oldTarget: 0,
+    theme: 'light',
+    learningDays: [0, 1, 2, 3, 4, 5, 6],
+    srsRules: JSON.parse(JSON.stringify(DEFAULT_SRS_RULES))
+  },
+  pages: {},     // { [pageNum]: { status: 'unlearned'|'learning'|'known'|'weak', mastery: 'none'|'solid'|'medium'|'fragile' } }
+  passages: [],  // { id, name, surah, start, end, pages, fraction, learnedPages, status, created }
+  tasks: [],
+  history: [],   // { date, title, type, outcome, pagesCount, minutes }
+  dayOverrides: {},
+  oldCursor: 0,
+  completedLoops: 0,
+  lastExportDate: null
+});
+
+function normalizePageEntry(entry) {
+  if (!entry) return { status: 'unlearned', mastery: 'none' };
+  if (typeof entry === 'string') {
+    const mastery = entry === 'known' ? 'solid' : entry === 'learning' ? 'medium' : entry === 'weak' ? 'fragile' : 'none';
+    return { status: entry, mastery };
+  }
+  return {
+    status: entry.status || 'unlearned',
+    mastery: entry.mastery || 'none'
+  };
+}
+
+let db = load();
+let currentPlan = [];
+let planningMode = 'week';
+let planningOffset = 0;
+
+function load() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(KEY) || '{}');
+    const def = defaults();
+    const merged = {
+      ...def,
+      ...raw,
+      settings: {
+        ...def.settings,
+        ...(raw.settings || {}),
+        learningDays: Array.isArray(raw.settings?.learningDays) ? raw.settings.learningDays : def.settings.learningDays,
+        srsRules: Array.isArray(raw.settings?.srsRules) && raw.settings.srsRules.length ? raw.settings.srsRules : def.settings.srsRules
+      }
+    };
+    const normPages = {};
+    Object.entries(merged.pages || {}).forEach(([k, v]) => {
+      normPages[k] = normalizePageEntry(v);
+    });
+    merged.pages = normPages;
+    merged.passages = (merged.passages || []).map(p => ({
+      ...p,
+      fraction: Number(p.fraction) || 1,
+      learnedPages: Number(p.learnedPages ?? (p.status === 'completed' ? p.pages : 0))
+    }));
+    return merged;
+  } catch (e) {
+    return defaults();
+  }
+}
+
+function save() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(db));
+  } catch (e) {
+    toast('Espace de stockage local saturé : pense à exporter ta sauvegarde.');
+  }
+}
+
+function toast(msg) {
+  const el = $('toast');
+  el.textContent = msg;
+  el.style.display = 'block';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { el.style.display = 'none'; }, 2800);
+}
+
+function localDateStr(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function parseLocalDate(str) {
+  const [y, m, d] = str.split('-').map(Number);
+  return new Date(y, m - 1, d, 12, 0, 0);
+}
+
+function addDaysStr(str, days) {
+  const d = parseLocalDate(str);
+  d.setDate(d.getDate() + days);
+  return localDateStr(d);
+}
+
+const today = () => localDateStr(new Date());
+const dateLabel = () => new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+const formatFrDate = dateStr => new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'long' }).format(parseLocalDate(dateStr));
+const $ = id => document.getElementById(id);
+
+function fmt(n) { return Math.round(n * 100) / 100; }
+function roundMin(m) { if (!m || m <= 0) return 0; return Math.max(1, Math.round(m)); }
+function fmtTime(m) {
+  m = roundMin(m);
+  if (m >= 60) {
+    const h = Math.floor(m / 60), r = m % 60;
+    return r ? `${h} h ${r}` : `${h} h`;
+  }
+  return `${m} min`;
+}
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// =========================================================================
+// 4. GESTION DES PAGES, STATUTS ET NIVEAUX DE MAÎTRISE EXPLICITES
+// =========================================================================
+function getPageInfo(p) {
+  return normalizePageEntry(db.pages[p]);
+}
+function pageStatus(p) {
+  return getPageInfo(p).status;
+}
+function pageMastery(p) {
+  return getPageInfo(p).mastery;
+}
+function setPageState(p, status, mastery = null) {
+  if (p < 1 || p > 604) return;
+  const prev = getPageInfo(p);
+  let nextMastery = mastery;
+  if (!nextMastery) {
+    if (status === 'known') nextMastery = 'solid';
+    else if (status === 'learning') nextMastery = 'medium';
+    else if (status === 'weak') nextMastery = 'fragile';
+    else nextMastery = 'none';
+  }
+  db.pages[p] = { status, mastery: nextMastery };
+  if (status === 'unlearned' && nextMastery === 'none' && !prev.status) {
+    delete db.pages[p];
+  }
+}
+
+function masteryLabel(m) {
+  return ({ solid: 'Solide', medium: 'Moyen', fragile: 'Fragile', none: 'Non évalué' })[m] || 'Non évalué';
+}
+function statusLabel(s) {
+  return ({ unlearned: 'Non apprise', learning: 'En apprentissage', known: 'Ancienne', weak: 'À renforcer' })[s] || s;
+}
+
+function knownPagesCount() {
+  return Object.keys(db.pages).filter(p => pageStatus(Number(p)) === 'known').length;
+}
+function oldPageList() {
+  return Object.keys(db.pages).filter(p => pageStatus(Number(p)) === 'known').map(Number).sort((a, b) => a - b);
+}
+
+function getEffectiveDayConfig(dateStr) {
+  const ov = db.dayOverrides[dateStr] || {};
+  const dow = parseLocalDate(dateStr).getDay();
+  const defaultCanLearn = (db.settings.learningDays || [0, 1, 2, 3, 4, 5, 6]).includes(dow);
+  const mode = ov.mode || (defaultCanLearn ? 'normal' : 'review');
+  const avail = Math.max(0, Number(ov.available ?? db.settings.defaultTime) || 0);
+  const newTarget = Math.max(0, Number(ov.newTarget ?? db.settings.newTarget) || 0);
+  return { mode, avail, newTarget };
+}
+
+function oldDailyQuota() {
+  const old = oldPageList();
+  const loop = Math.max(1, Number(db.settings.loopDays) || 15);
+  const manual = Number(db.settings.oldTarget) || 0;
+  if (manual > 0) return Math.max(1, Math.round(manual));
+  if (!old.length) return 0;
+  return Math.max(1, Math.ceil(old.length / loop));
+}
+
+function sliceOldPages(cursor, n, oldList) {
+  if (!oldList.length || n <= 0) return { pages: [], nextCursor: cursor, wrapped: false };
+  const count = Math.min(n, oldList.length);
+  let i = cursor % oldList.length;
+  let wrapped = false;
+  const pages = [];
+  for (let k = 0; k < count; k++) {
+    pages.push(oldList[i]);
+    if (i + 1 >= oldList.length) wrapped = true;
+    i = (i + 1) % oldList.length;
+  }
+  return { pages, nextCursor: i, wrapped };
+}
+
+function formatPageRangeLabel(pages) {
+  if (!pages || !pages.length) return '';
+  if (pages.length === 1) return `p. ${pages[0]}`;
+  let contiguous = true;
+  for (let i = 1; i < pages.length; i++) {
+    if (pages[i] !== pages[i - 1] + 1) { contiguous = false; break; }
+  }
+  return contiguous ? `p. ${pages[0]}–${pages[pages.length - 1]}` : `p. ${pages[0]}…${pages[pages.length - 1]} (${pages.length}p)`;
+}
+
+function getExactLearnSlice(passage, learnedOffset, qty) {
+  const startPage = Number(passage.start) || 1;
+  const exactStart = startPage + learnedOffset;
+  const wholePage = Math.max(1, Math.min(604, Math.floor(exactStart)));
+  const fracOffset = fmt(exactStart - wholePage);
+  const endExact = exactStart + qty;
+  const wholeEnd = Math.max(wholePage, Math.min(604, Math.ceil(endExact) - 1));
+  const partIdx = Math.floor(fracOffset * Math.max(1, Math.round(1 / Math.max(0.25, qty))));
+  const verseHint = estimateVerseHint(wholePage, qty, partIdx);
+
+  let pageLabel = '';
+  if (qty >= 0.99 && fracOffset === 0) {
+    pageLabel = `p. ${wholePage}`;
+  } else if (wholeEnd <= wholePage) {
+    pageLabel = `p. ${wholePage} (${formatFractionLabel(qty)})`;
+  } else {
+    pageLabel = `p. ${wholePage}–${wholeEnd} (${fmt(qty)} p.)`;
+  }
+
+  return {
+    pageLabel,
+    verseHint,
+    wholePage,
+    wholeEnd,
+    sName: surahNameByPage(wholePage)
+  };
+}
+
+function getActiveSrsRules() {
+  const rules = db.settings.srsRules && db.settings.srsRules.length ? db.settings.srsRules : DEFAULT_SRS_RULES;
+  return [...rules].sort((a, b) => Number(a.offset) - Number(b.offset));
+}
+
+function createSrsBatch(passage, pageLabel, verseHint, wholePage, wholeEnd, qty, baseDateStr) {
+  const batchId = crypto.randomUUID();
+  const rules = getActiveSrsRules();
+  rules.forEach((rule, idx) => {
+    const offset = Math.max(0, Number(rule.offset) || 0);
+    const reps = Math.max(1, Number(rule.reps) || 1);
+    const kind = rule.kind || (idx === rules.length - 1 ? 'final' : 'repeat');
+    const date = addDaysStr(baseDateStr, offset);
+    db.tasks.push({
+      id: crypto.randomUUID(),
+      type: 'srs',
+      title: `${surahNameByPage(wholePage)} (${pageLabel}) — ${rule.label} (×${reps})`,
+      subtitle: `${verseHint} · Repère indicatif`,
+      shortLabel: `SRS ${pageLabel} ×${reps}`,
+      minutes: roundMin(qty * db.settings.repeatMin * reps / 10),
+      date,
+      done: false,
+      meta: {
+        passageId: passage.id,
+        batchId,
+        ruleIndex: idx,
+        pageLabel,
+        verseHint,
+        wholePage,
+        wholeEnd,
+        qty,
+        stage: rule.label,
+        kind,
+        reps
+      }
+    });
+  });
+}
+
+// =========================================================================
+// 5. MOTEUR DE PLANIFICATION (PRIORITÉS STRICTES & OBJECTIF QUOTIDIEN)
+// =========================================================================
+function plan() {
+  const todayStr = today();
+  const avail = Math.max(0, Number($('available').value) || 0);
+  const mode = $('dayMode').value;
+  const userNewTarget = Math.max(0, Number($('todayNewTarget').value) ?? Number(db.settings.newTarget) ?? 1);
+
+  db.settings.newTarget = userNewTarget;
+  db.dayOverrides[todayStr] = { available: avail, mode, newTarget: userNewTarget };
+
+  const tasks = [];
+  const reported = [];
+  let remaining = avail;
+
+  function pushTask(t) {
+    if (t.minutes <= remaining + 0.01) {
+      tasks.push(t);
+      if (!t.done) remaining = Math.max(0, remaining - t.minutes);
+    } else {
+      reported.push({ ...t, title: `${t.title} — reporté (temps insuffisant)` });
+    }
+  }
+
+  // Priorité 1 : Révisions SRS du nouveau (dues aujourd'hui ou en retard < todayStr)
+  const dueSrs = db.tasks.filter(t => !t.done && t.type === 'srs' && t.date <= todayStr);
+  dueSrs
+    .filter(t => t.meta?.kind !== 'check' && t.meta?.kind !== 'final')
+    .forEach(t => pushTask(t));
+
+  // Priorité 2 : Révision de l'ancien (Manzil) — retards réels d'abord, puis quota du jour
+  db.tasks
+    .filter(t => !t.done && t.type === 'old' && t.date < todayStr)
+    .forEach(t => pushTask(t));
+
+  const existingOldToday = db.tasks.find(t => t.type === 'old' && t.date === todayStr && t.meta?.dailyGenerated);
+  if (existingOldToday) {
+    pushTask(existingOldToday);
+  } else {
+    const q = oldDailyQuota();
+    const oldList = oldPageList();
+    if (q > 0 && oldList.length > 0) {
+      const { pages, nextCursor, wrapped } = sliceOldPages(db.oldCursor || 0, q, oldList);
+      const rangeLbl = formatPageRangeLabel(pages);
+      const tOld = {
+        id: crypto.randomUUID(),
+        type: 'old',
+        title: `Révision Ancien : ${pages.length} page(s) (${rangeLbl})`,
+        subtitle: `Boucle ${db.settings.loopDays} j · ${estimateVerseHint(pages[0], 1)}`,
+        shortLabel: `Anc. ${rangeLbl}`,
+        minutes: roundMin(pages.length * db.settings.oldMin),
+        date: todayStr,
+        done: false,
+        meta: { dailyGenerated: true, qty: pages.length, pages, rangeLbl, wrapped }
+      };
+      if (tOld.minutes <= remaining + 0.01) {
+        db.oldCursor = nextCursor;
+        db.tasks.push(tOld);
+        pushTask(tOld);
+      } else {
+        reported.push({ ...tOld, title: `${tOld.title} — reporté` });
+      }
+    }
+  }
+
+  // Priorité 3 : Passages non maîtrisés / à renforcer & Contrôles / Tests finaux SRS
+  db.tasks
+    .filter(t => !t.done && t.type === 'weak' && t.date <= todayStr)
+    .forEach(t => pushTask(t));
+
+  dueSrs
+    .filter(t => t.meta?.kind === 'check' || t.meta?.kind === 'final')
+    .forEach(t => pushTask(t));
+
+  // Priorité 4 & 5 : Nouvel apprentissage (uniquement si mode === 'normal' et borné à userNewTarget)
+  const existingLearnToday = db.tasks.find(t => t.type === 'learn' && t.date === todayStr && t.meta?.dailyGenerated);
+  if (mode === 'normal') {
+    if (existingLearnToday) {
+      pushTask(existingLearnToday);
+    } else if (userNewTarget >= 0.25 && remaining > 0) {
+      const nextP = db.passages.find(x => x.status !== 'suspended' && x.status !== 'completed' && (x.pages - (x.learnedPages || 0)) > 0.001);
+      if (nextP) {
+        const remInPassage = fmt(nextP.pages - (nextP.learnedPages || 0));
+        const firstRule = getActiveSrsRules()[0];
+        const j0RepeatCost = (firstRule && firstRule.offset === 0)
+          ? (Number(db.settings.repeatMin) || 0) * ((Number(firstRule.reps) || 1) / 10)
+          : 0;
+        const costPerPage = Math.max(1, Number(db.settings.learnMin) || 60) + j0RepeatCost;
+        const maxByTime = Math.floor((remaining / costPerPage) * 4) / 4;
+        const qty = Math.min(userNewTarget, remInPassage, maxByTime);
+
+        if (qty >= 0.25) {
+          const slice = getExactLearnSlice(nextP, nextP.learnedPages || 0, qty);
+          const tLearn = {
+            id: crypto.randomUUID(),
+            type: 'learn',
+            title: `Nouvel apprentissage : ${slice.sName} — ${slice.pageLabel}`,
+            subtitle: `${slice.verseHint} (repère indicatif)`,
+            shortLabel: `Nouv. ${slice.pageLabel}`,
+            minutes: roundMin(qty * db.settings.learnMin),
+            date: todayStr,
+            done: false,
+            meta: {
+              dailyGenerated: true,
+              passageId: nextP.id,
+              qty,
+              pageLabel: slice.pageLabel,
+              verseHint: slice.verseHint,
+              wholePage: slice.wholePage,
+              wholeEnd: slice.wholeEnd
+            }
+          };
+          db.tasks.push(tLearn);
+          pushTask(tLearn);
+
+          // Priorité 6 : Préparation du prochain apprentissage (si temps restant et prepMin > 0)
+          if (db.settings.prepMin > 0 && remaining > 0) {
+            const nextOffset = (nextP.learnedPages || 0) + qty;
+            if (nextOffset < nextP.pages) {
+              const prepQty = Math.min(
+                userNewTarget,
+                fmt(nextP.pages - nextOffset),
+                Math.floor((remaining / db.settings.prepMin) * 4) / 4
+              );
+              if (prepQty >= 0.25) {
+                const prepSlice = getExactLearnSlice(nextP, nextOffset, prepQty);
+                const tPrep = {
+                  id: crypto.randomUUID(),
+                  type: 'prep',
+                  title: `Préparation : ${prepSlice.sName} — ${prepSlice.pageLabel}`,
+                  subtitle: `${prepSlice.verseHint} (repère indicatif)`,
+                  shortLabel: `Prép. ${prepSlice.pageLabel}`,
+                  minutes: roundMin(prepQty * db.settings.prepMin),
+                  date: todayStr,
+                  done: false,
+                  meta: { dailyGenerated: true, passageId: nextP.id, qty: prepQty }
+                };
+                pushTask(tPrep);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  currentPlan = tasks;
+  const totalPlanned = tasks.reduce((s, t) => s + t.minutes, 0);
+  $('freeTimePreview').value = `${fmtTime(remaining)} libres conservés`;
+  $('dayModeTag').textContent = mode === 'review' ? 'Révisions uniquement' : `Objectif : ${fmt(userNewTarget)} p./jour`;
+  $('dayModeTag').className = mode === 'review' ? 'tag warn' : 'tag';
+
+  $('planSummary').innerHTML = `
+    <b>${fmtTime(totalPlanned)} planifiées</b> sur ${fmtTime(avail)} disponibles
+    ${remaining > 0 ? ` · <span style="color:var(--green)"><b>${fmtTime(remaining)} libres</b> conservés</span>` : ''}
+    ${reported.length ? `<br><span style="color:var(--red)">${reported.length} tâche(s) reportée(s) faute de temps.</span>` : ''}
+  `;
+  $('planStatus').textContent = tasks.length ? `${tasks.length} tâche(s)` : 'Aucune tâche';
+  renderTasks();
+  renderTodayStats(avail, totalPlanned, remaining);
+  save();
+}
+
+function renderTasks() {
+  const el = $('tasks');
+  if (!currentPlan.length) {
+    el.innerHTML = '<div class="empty">Aucune tâche prévue aujourd\'hui. Ajoute des passages dans <b>Apprentissage</b> ou des pages connues dans <b>Révisions</b>.</div>';
+    return;
+  }
+  const todayStr = today();
+  el.innerHTML = currentPlan.map(t => {
+    const isLate = !t.done && t.date < todayStr;
+    return `
+      <div class="task ${t.done ? 'done' : ''}">
+        <input type="checkbox" data-task="${t.id}" ${t.done ? 'checked' : ''}>
+        <div style="flex:1">
+          <div class="row">
+            <span class="tasktitle">${esc(t.title)}</span>
+            <span class="tag">${fmtTime(t.minutes)}</span>
+          </div>
+          ${t.subtitle ? `<div class="small muted" style="margin-top:2px">${esc(t.subtitle)}</div>` : ''}
+          <div class="row" style="margin-top:6px">
+            <span class="small muted">
+              ${typeName(t.type)}
+              ${isLate ? ' · <b style="color:var(--red)">En retard / Reporté</b>' : ''}
+            </span>
+            ${t.type === 'srs' && !t.done ? `
+              <div class="pillrow">
+                <button class="pill ok" data-srs-ok="${t.id}">✓ Validé</button>
+                <button class="pill hes" data-hesitate="${t.id}">~ Hésitation</button>
+                <button class="pill fail" data-fail="${t.id}">✕ Raté</button>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  el.querySelectorAll('[data-task]').forEach(c => c.addEventListener('change', () => completeTask(c.dataset.task, c.checked)));
+  el.querySelectorAll('[data-srs-ok]').forEach(b => b.addEventListener('click', () => completeTask(b.dataset.srsOk, true)));
+  el.querySelectorAll('[data-hesitate]').forEach(b => b.addEventListener('click', () => handleSrsOutcome(b.dataset.hesitate, 'hesitate')));
+  el.querySelectorAll('[data-fail]').forEach(b => b.addEventListener('click', () => handleSrsOutcome(b.dataset.fail, 'fail')));
+}
+
+// =========================================================================
+// 6. RÉSULTATS SRS (VALIDÉ / HÉSITATION / RATÉ) & VALIDATION DES TÂCHES
+// =========================================================================
+function handleSrsOutcome(id, outcome) {
+  const t = db.tasks.find(x => x.id === id);
+  if (!t) return;
+  const todayStr = today();
+  const tomorrowStr = addDaysStr(todayStr, 1);
+  const batchId = t.meta?.batchId;
+  const reps = Number(t.meta?.reps) || 5;
+  const qty = Number(t.meta?.qty) || 1;
+  const pageLabel = t.meta?.pageLabel || 'Passage';
+  const verseHint = t.meta?.verseHint || '';
+  const wholePage = Number(t.meta?.wholePage) || 1;
+  const wholeEnd = Number(t.meta?.wholeEnd) || wholePage;
+
+  if (outcome === 'hesitate') {
+    db.history.push({
+      date: todayStr,
+      title: `${t.title} — Hésitation (reprogrammé demain)`,
+      type: 'srs',
+      outcome: 'hesitate',
+      pagesCount: 0,
+      minutes: t.minutes
+    });
+    if (batchId) {
+      db.tasks.filter(x => !x.done && x.meta?.batchId === batchId && x.date >= todayStr).forEach(x => {
+        x.date = addDaysStr(x.date, 1);
+      });
+    } else {
+      t.date = tomorrowStr;
+    }
+    t.title = t.title.replace(' (consolidation)', '') + ' (consolidation)';
+    t.shortLabel = `SRS ${pageLabel} ×${reps}`;
+    toast(`Hésitation notée : "${pageLabel}" reprogrammé demain (×${reps}) et échéances décalées.`);
+  } else if (outcome === 'fail') {
+    db.history.push({
+      date: todayStr,
+      title: `${t.title} — Raté (consolidation rapprochée)`,
+      type: 'srs',
+      outcome: 'fail',
+      pagesCount: 0,
+      minutes: t.minutes
+    });
+
+    for (let pg = wholePage; pg <= wholeEnd; pg++) {
+      setPageState(pg, 'weak', 'fragile');
+    }
+
+    if (batchId) {
+      db.tasks.filter(x => !x.done && x.meta?.batchId === batchId && x.id !== t.id).forEach(x => {
+        x.date = addDaysStr(x.date, 2);
+      });
+    }
+
+    t.date = tomorrowStr;
+    t.title = `${surahNameByPage(wholePage)} (${pageLabel}) — Reprise renforcée J+1 (×10)`;
+    t.subtitle = `${verseHint} · Consolidation après raté`;
+    t.shortLabel = `Renf. ${pageLabel} ×10`;
+    t.minutes = roundMin(qty * db.settings.repeatMin);
+    t.meta = { ...t.meta, reps: 10, stage: 'Reprise J+1', kind: 'repeat' };
+
+    db.tasks.push({
+      id: crypto.randomUUID(),
+      type: 'srs',
+      title: `${surahNameByPage(wholePage)} (${pageLabel}) — Consolidation J+2 (×5)`,
+      subtitle: `${verseHint} · Consolidation après raté`,
+      shortLabel: `Renf. ${pageLabel} ×5`,
+      minutes: roundMin(qty * db.settings.repeatMin * 0.5),
+      date: addDaysStr(todayStr, 2),
+      done: false,
+      meta: { ...t.meta, reps: 5, stage: 'Consolidation J+2', kind: 'repeat' }
+    });
+
+    toast(`Raté noté : "${pageLabel}" marqué Fragile / À renforcer (×10 demain, ×5 après-demain).`);
+  }
+
+  save();
+  plan();
+  renderAll();
+}
+
+function completeTask(id, checked) {
+  const t = currentPlan.find(x => x.id === id) || db.tasks.find(x => x.id === id);
+  if (!t) return;
+  t.done = checked;
+  if (checked) {
+    t.completedAt = new Date().toISOString();
+    if (t.type === 'learn' && t.meta?.passageId) {
+      const p = db.passages.find(x => x.id === t.meta.passageId);
+      if (p) {
+        const qty = Number(t.meta.qty) || 1;
+        p.learnedPages = fmt((p.learnedPages || 0) + qty);
+        p.status = p.learnedPages >= p.pages ? 'completed' : 'active';
+        for (let pg = t.meta.wholePage; pg <= t.meta.wholeEnd; pg++) {
+          if (pageStatus(pg) === 'unlearned') setPageState(pg, 'learning', 'medium');
+        }
+        createSrsBatch(p, t.meta.pageLabel, t.meta.verseHint || '', t.meta.wholePage, t.meta.wholeEnd, qty, today());
+      }
+    }
+    if (t.type === 'srs') {
+      const isFinal = t.meta?.kind === 'final' || t.meta?.stage === 'J15 test';
+      const remInBatch = t.meta?.batchId
+        ? db.tasks.filter(x => x.type === 'srs' && x.meta?.batchId === t.meta.batchId && !x.done && x.id !== t.id).length
+        : 0;
+      if (isFinal || remInBatch === 0) {
+        for (let pg = t.meta.wholePage; pg <= t.meta.wholeEnd; pg++) {
+          setPageState(pg, 'known', 'solid');
+        }
+        toast(`${t.meta.pageLabel} validé et passé en Ancien (Maîtrise : Solide) !`);
+      }
+    }
+    if (t.type === 'old' && t.meta?.wrapped) {
+      db.completedLoops = (db.completedLoops || 0) + 1;
+    }
+    if (t.type === 'weak' && t.meta?.page) {
+      setPageState(t.meta.page, 'known', 'solid');
+    }
+    db.history.push({
+      date: today(),
+      title: t.title,
+      type: t.type,
+      outcome: 'ok',
+      pagesCount: Number(t.meta?.qty) || 0,
+      minutes: t.minutes
+    });
+  }
+  save();
+  plan();
+  renderAll();
+}
+
+function typeName(t) {
+  return ({
+    srs: '1. Révision du nouveau (SRS)',
+    old: '2. Révision de l’ancien (Manzil)',
+    weak: '3. Passage à renforcer',
+    learn: '5. Nouvel apprentissage',
+    prep: '6. Préparation'
+  })[t] || t;
+}
+
+// =========================================================================
+// 7. VUES : AUJOURD'HUI, APPRENTISSAGE, RÉVISIONS, MON CORAN
+// =========================================================================
+function renderTodayStats(avail, total, remaining) {
+  const activePassages = db.passages.filter(p => p.status !== 'completed' && p.status !== 'suspended' && (p.pages - (p.learnedPages || 0)) > 0).length;
+  $('todayStats').innerHTML = [
+    ['Temps planifié', fmtTime(total)],
+    ['Temps libre restant', fmtTime(remaining)],
+    ['Pages anciennes', knownPagesCount()],
+    ['Passages actifs', activePassages]
+  ].map(x => `<div class="card"><div class="stat">${x[1]}</div><div class="statlabel">${x[0]}</div></div>`).join('');
+}
+
+function renderPassages() {
+  $('passCount').textContent = `${db.passages.length} passage(s)`;
+  $('passages').innerHTML = db.passages.length ? db.passages.map((p, i) => {
+    const doneP = fmt(p.learnedPages || 0);
+    const nextPg = Math.min(p.end, (Number(p.start) || 1) + Math.floor(doneP));
+    const fracLbl = formatFractionLabel(p.fraction || 1);
+    const badge = doneP >= p.pages
+      ? '<span class="tag ok">Terminé</span>'
+      : p.status === 'suspended'
+        ? '<span class="tag warn">Suspendu</span>'
+        : '<span class="tag gold">Actif</span>';
+    const progressText = doneP >= p.pages
+      ? 'Terminé'
+      : `Acquis : ${doneP}/${p.pages} p. · Prochaine : p. ${nextPg} (${estimateVerseHint(nextPg, p.fraction || 1)})`;
+
+    return `
+      <div class="task">
+        <div style="flex:1">
+          <div class="row">
+            <span class="tasktitle">${i + 1}. ${esc(p.name)}</span>
+            ${badge}
+          </div>
+          <div class="small muted" style="margin-top:3px">Découpage : ${fracLbl} · ${progressText}</div>
+          <div class="pillrow" style="margin-top:8px">
+            <button class="pill" data-up="${p.id}">↑ Monter</button>
+            <button class="pill" data-down="${p.id}">↓ Descendre</button>
+            ${doneP < p.pages ? `<button class="pill" data-toggle-susp="${p.id}">${p.status === 'suspended' ? '▶ Reprendre' : '⏸ Suspendre'}</button>` : ''}
+            <button class="pill fail" data-del="${p.id}">× Retirer</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('') : '<div class="empty">Aucun passage ajouté. Choisis une sourate ou une plage ci-dessus.</div>';
+
+  $('passages').querySelectorAll('[data-up]').forEach(b => b.onclick = () => movePass(b.dataset.up, -1));
+  $('passages').querySelectorAll('[data-down]').forEach(b => b.onclick = () => movePass(b.dataset.down, 1));
+  $('passages').querySelectorAll('[data-toggle-susp]').forEach(b => b.onclick = () => {
+    const p = db.passages.find(x => x.id === b.dataset.toggleSusp);
+    if (!p) return;
+    p.status = p.status === 'suspended' ? ((p.learnedPages || 0) > 0 ? 'active' : 'queued') : 'suspended';
+    save();
+    renderAll();
+    plan();
+    toast(p.status === 'suspended' ? 'Passage mis en pause.' : 'Passage repris.');
+  });
+  $('passages').querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
+    db.passages = db.passages.filter(p => p.id !== b.dataset.del);
+    save();
+    renderAll();
+    plan();
+    toast('Passage retiré de la liste.');
+  });
+}
+
+function movePass(id, d) {
+  const i = db.passages.findIndex(p => p.id === id), j = i + d;
+  if (j < 0 || j >= db.passages.length) return;
+  [db.passages[i], db.passages[j]] = [db.passages[j], db.passages[i]];
+  save();
+  renderPassages();
+  renderPlanning();
+}
+
+function renderSrs() {
+  const list = db.tasks.filter(t => t.type === 'srs' && !t.done).sort((a, b) => a.date.localeCompare(b.date));
+  $('srsList').innerHTML = list.length ? list.slice(0, 30).map(t => `
+    <div class="task">
+      <div style="flex:1">
+        <div class="tasktitle">${esc(t.title)}</div>
+        <div class="small muted">Échéance : ${formatFrDate(t.date)} · ${fmtTime(t.minutes)}${t.subtitle ? ` · ${esc(t.subtitle)}` : ''}</div>
+        <div class="pillrow" style="margin-top:7px">
+          <button class="pill ok" data-srs-ok2="${t.id}">✓ Validé</button>
+          <button class="pill hes" data-hesitate2="${t.id}">~ Hésitation</button>
+          <button class="pill fail" data-fail2="${t.id}">✕ Raté</button>
+        </div>
+      </div>
+    </div>
+  `).join('') : '<div class="empty">Aucune échéance SRS en attente.</div>';
+
+  $('srsList').querySelectorAll('[data-srs-ok2]').forEach(b => b.onclick = () => completeTask(b.dataset.srsOk2, true));
+  $('srsList').querySelectorAll('[data-hesitate2]').forEach(b => b.onclick = () => handleSrsOutcome(b.dataset.hesitate2, 'hesitate'));
+  $('srsList').querySelectorAll('[data-fail2]').forEach(b => b.onclick = () => handleSrsOutcome(b.dataset.fail2, 'fail'));
+}
+
+function renderWeak() {
+  const list = db.tasks.filter(t => t.type === 'weak' && !t.done);
+  $('weakList').innerHTML = list.length ? list.map(t => `
+    <div class="task">
+      <div style="flex:1">
+        <div class="tasktitle">${esc(t.title)}</div>
+        <div class="small muted">À reprendre : ${formatFrDate(t.date)} · ${fmtTime(t.minutes)}</div>
+      </div>
+      <button class="pill ok" data-ok="${t.id}">✓ Validé</button>
+    </div>
+  `).join('') : '<div class="empty">Aucun passage signalé comme non maîtrisé ou à renforcer.</div>';
+
+  $('weakList').querySelectorAll('[data-ok]').forEach(b => b.onclick = () => {
+    const t = db.tasks.find(x => x.id === b.dataset.ok);
+    if (t) {
+      t.done = true;
+      if (t.meta?.page) setPageState(t.meta.page, 'known', 'solid');
+      db.history.push({ date: today(), title: `${t.title} — validé`, type: 'weak', outcome: 'ok', pagesCount: 0, minutes: t.minutes });
+    }
+    save();
+    renderAll();
+    plan();
+    toast('Passage validé.');
+  });
+}
+
+function renderOld() {
+  const q = oldDailyQuota();
+  const k = knownPagesCount();
+  $('oldSummary').textContent = `${k} page(s) connue(s) dans l'ancien. Quota : ${q ? q + ' page(s) entière(s)/jour' : '0 page'} sur ${db.settings.loopDays} jours (~${fmtTime(q * db.settings.oldMin)}/jour).`;
+}
+
+function renderQuran() {
+  const el = $('pageGrid');
+  el.innerHTML = Array.from({ length: 604 }, (_, i) => {
+    const p = i + 1;
+    const s = pageStatus(p);
+    const cls = s === 'known' ? 'known' : s === 'learning' ? 'learning' : s === 'weak' ? 'weak' : '';
+    return `<button type="button" class="pg ${cls}" data-page="${p}" title="Page ${p} — ${statusLabel(s)}">${p}</button>`;
+  }).join('');
+  el.querySelectorAll('[data-page]').forEach(b => b.onclick = () => openPageModal(Number(b.dataset.page)));
+
+  const learningCnt = Object.keys(db.pages).filter(p => pageStatus(Number(p)) === 'learning').length;
+  const weakCnt = Object.keys(db.pages).filter(p => pageStatus(Number(p)) === 'weak').length;
+  $('quranCount').textContent = `${knownPagesCount()} anciennes · ${learningCnt} en cours · ${weakCnt} à renforcer`;
+}
+
+function openPageModal(p) {
+  const info = getPageInfo(p);
+  const sInfo = surahByPage(p);
+  $('modalContent').innerHTML = `
+    <h3>Page ${p} — ${esc(sInfo[1])} (${esc(sInfo[2])})</h3>
+    <p class="muted small" style="margin-top:0">
+      Statut actuel : <b>${statusLabel(info.status)}</b> · Niveau de maîtrise : <b>${masteryLabel(info.mastery)}</b><br>
+      Repère versets (1/4 / 1/2 / 1 p.) : ${esc(estimateVerseHint(p, 0.25, 0))} · ${esc(estimateVerseHint(p, 0.5, 0))} · ${esc(estimateVerseHint(p, 1, 0))}
+    </p>
+    <div class="field" style="margin-bottom:10px">
+      <label for="modalPageMastery">Niveau de maîtrise (choisi ou déduit de tes validations)</label>
+      <select id="modalPageMastery">
+        <option value="solid" ${info.mastery === 'solid' ? 'selected' : ''}>Solide</option>
+        <option value="medium" ${info.mastery === 'medium' ? 'selected' : ''}>Moyen</option>
+        <option value="fragile" ${info.mastery === 'fragile' ? 'selected' : ''}>Fragile</option>
+        <option value="none" ${info.mastery === 'none' ? 'selected' : ''}>Non évalué</option>
+      </select>
+    </div>
+    <div class="stack">
+      ${[
+        ['unlearned', 'Non apprise'],
+        ['learning', 'En apprentissage / Récente'],
+        ['known', 'Ancienne — connue'],
+        ['weak', 'À renforcer / Non maîtrisée']
+      ].map(([v, l]) => `
+        <button class="btn ${info.status === v ? 'primary' : 'soft'}" data-status="${v}">${l}</button>
+      `).join('')}
+    </div>
+  `;
+  $('modal').style.display = 'flex';
+  $('modalContent').querySelectorAll('[data-status]').forEach(b => b.onclick = () => {
+    const st = b.dataset.status;
+    const chosenMastery = $('modalPageMastery').value;
+    setPageState(p, st, chosenMastery);
+    if (st === 'weak') {
+      const exists = db.tasks.some(t => t.type === 'weak' && t.meta?.page === p && !t.done);
+      if (!exists) {
+        db.tasks.push({
+          id: crypto.randomUUID(),
+          type: 'weak',
+          title: `Page ${p} (${surahNameByPage(p)}) — à renforcer`,
+          subtitle: estimateVerseHint(p, 1),
+          shortLabel: `Renf. p. ${p}`,
+          minutes: roundMin(db.settings.oldMin),
+          date: today(),
+          done: false,
+          meta: { page: p }
+        });
+      }
+    }
+    save();
+    $('modal').style.display = 'none';
+    renderAll();
+    plan();
+  });
+}
+
+function applyRange() {
+  const a = Number($('rangeStart').value), b = Number($('rangeEnd').value) || a, s = $('rangeStatus').value;
+  if (!Number.isInteger(a) || a < 1 || a > 604 || !Number.isInteger(b) || b < a || b > 604) {
+    toast('Entre une plage valide (1 à 604).');
+    return;
+  }
+  for (let p = a; p <= b; p++) {
+    setPageState(p, s);
+    if (s === 'weak') {
+      const exists = db.tasks.some(t => t.type === 'weak' && t.meta?.page === p && !t.done);
+      if (!exists) {
+        db.tasks.push({
+          id: crypto.randomUUID(),
+          type: 'weak',
+          title: `Page ${p} (${surahNameByPage(p)}) — à renforcer`,
+          subtitle: estimateVerseHint(p, 1),
+          shortLabel: `Renf. p. ${p}`,
+          minutes: roundMin(db.settings.oldMin),
+          date: today(),
+          done: false,
+          meta: { page: p }
+        });
+      }
+    }
+  }
+  save();
+  renderAll();
+  plan();
+  toast(`Plage p. ${a}–${b} mise à jour.`);
+}
+
+// =========================================================================
+// 8. PLANNING (SEMAINE & MOIS, CODE COULEUR, SAISIE RÉELLE SUR LE JOUR)
+// =========================================================================
+function buildPlanningSimulation(maxTargetDate) {
+  const todayStr = today();
+  const simMap = {};
+  const rules = getActiveSrsRules();
+
+  const simPassages = db.passages.map(p => ({
+    ...p,
+    simLearned: Number(p.learnedPages || 0)
+  }));
+
+  const virtualSrs = db.tasks
+    .filter(t => t.type === 'srs' && !t.done)
+    .map(t => ({ ...t }));
+
+  let simOldCursor = db.oldCursor || 0;
+  const oldList = oldPageList();
+  const quotaOld = oldDailyQuota();
+
+  let cursorDate = todayStr;
+  let guard = 0;
+  while (cursorDate <= maxTargetDate && guard < 240) {
+    guard++;
+    const isToday = cursorDate === todayStr;
+    const cfg = getEffectiveDayConfig(cursorDate);
+    const avail = cfg.avail;
+    const mode = cfg.mode;
+    const dayTarget = cfg.newTarget;
+
+    let remaining = avail;
+    const items = [];
+    const badges = [];
+
+    if (mode === 'review') {
+      badges.push({ cls: 'revtag', text: 'Révisions seuls.' });
+    }
+
+    // 1. SRS du jour (les retards < todayStr n'apparaissent qu'à partir d'aujourd'hui, jamais sur le futur)
+    const daySrs = virtualSrs.filter(t => isToday ? t.date <= todayStr : t.date === cursorDate);
+    const srsSummary = new Map();
+    daySrs.forEach(t => {
+      if (remaining >= t.minutes || isToday) {
+        items.push({ title: t.title, subtitle: t.subtitle || '', minutes: t.minutes, type: 'srs', done: t.done });
+        if (!t.done) remaining = Math.max(0, remaining - t.minutes);
+        if (t.meta?.pageLabel) {
+          const prevReps = srsSummary.get(t.meta.pageLabel) || 0;
+          srsSummary.set(t.meta.pageLabel, prevReps + (Number(t.meta.reps) || 1));
+        }
+      }
+    });
+    if (srsSummary.size > 0) {
+      const entries = Array.from(srsSummary.entries());
+      const first = entries[0];
+      const lbl = entries.length === 1
+        ? `SRS ${first[0]} ×${first[1]}`
+        : `SRS ${first[0]} (+${entries.length - 1})`;
+      badges.push({ cls: 'srs', text: lbl });
+    }
+
+    // 2. Révision de l'ancien (Manzil)
+    const existingOld = db.tasks.find(t => t.type === 'old' && t.date === cursorDate);
+    if (existingOld) {
+      items.push({ title: existingOld.title, subtitle: existingOld.subtitle || '', minutes: existingOld.minutes, type: 'old', done: existingOld.done });
+      if (!existingOld.done) remaining = Math.max(0, remaining - existingOld.minutes);
+      badges.push({ cls: 'old', text: existingOld.shortLabel || `Anc. ${existingOld.meta?.rangeLbl || ''}` });
+    } else if (!isToday && quotaOld > 0 && oldList.length > 0) {
+      const { pages, nextCursor } = sliceOldPages(simOldCursor, quotaOld, oldList);
+      simOldCursor = nextCursor;
+      const rangeLbl = formatPageRangeLabel(pages);
+      const mins = roundMin(pages.length * db.settings.oldMin);
+      items.push({
+        title: `Révision Ancien : ${pages.length} page(s) (${rangeLbl})`,
+        subtitle: estimateVerseHint(pages[0], 1),
+        minutes: mins,
+        type: 'old'
+      });
+      remaining = Math.max(0, remaining - mins);
+      badges.push({ cls: 'old', text: `Anc. ${rangeLbl}` });
+    }
+
+    // 3. Passages à renforcer
+    const dayWeak = db.tasks.filter(t => !t.done && t.type === 'weak' && (isToday ? t.date <= todayStr : t.date === cursorDate));
+    if (dayWeak.length > 0) {
+      dayWeak.forEach(t => {
+        items.push({ title: t.title, subtitle: t.subtitle || '', minutes: t.minutes, type: 'weak' });
+        remaining = Math.max(0, remaining - t.minutes);
+      });
+      const pFirst = dayWeak[0].meta?.page ? `p. ${dayWeak[0].meta.page}` : `${dayWeak.length}p`;
+      badges.push({ cls: 'weak', text: `Renf. ${pFirst}${dayWeak.length > 1 ? '…' : ''}` });
+    }
+
+    // 4. Nouvel apprentissage (uniquement si mode === 'normal' et dans la limite de dayTarget)
+    const existingLearnToday = isToday ? db.tasks.find(t => t.type === 'learn' && t.date === todayStr) : null;
+    if (existingLearnToday) {
+      items.push({
+        title: existingLearnToday.title,
+        subtitle: existingLearnToday.subtitle || '',
+        minutes: existingLearnToday.minutes,
+        type: 'learn',
+        done: existingLearnToday.done
+      });
+      if (!existingLearnToday.done) remaining = Math.max(0, remaining - existingLearnToday.minutes);
+      badges.push({ cls: 'learn', text: existingLearnToday.shortLabel || `Nouv. ${existingLearnToday.meta?.pageLabel || ''}` });
+      const sp = simPassages.find(x => x.id === existingLearnToday.meta?.passageId);
+      if (sp && !existingLearnToday.done) {
+        sp.simLearned = fmt(sp.simLearned + (Number(existingLearnToday.meta?.qty) || 0));
+      }
+    } else if (mode === 'normal' && dayTarget >= 0.25 && remaining > 0) {
+      const nextP = simPassages.find(x => x.status !== 'suspended' && x.status !== 'completed' && (x.pages - x.simLearned) > 0.001);
+      if (nextP) {
+        const remInPassage = fmt(nextP.pages - nextP.simLearned);
+        const firstRule = rules[0];
+        const j0RepeatCost = (firstRule && firstRule.offset === 0)
+          ? (Number(db.settings.repeatMin) || 0) * ((Number(firstRule.reps) || 1) / 10)
+          : 0;
+        const costPerPage = Math.max(1, Number(db.settings.learnMin) || 60) + j0RepeatCost;
+        const maxByTime = Math.floor((remaining / costPerPage) * 4) / 4;
+        const qty = Math.min(dayTarget, remInPassage, maxByTime);
+
+        if (qty >= 0.25) {
+          const slice = getExactLearnSlice(nextP, nextP.simLearned, qty);
+          const mins = roundMin(qty * db.settings.learnMin);
+          items.push({
+            title: `Nouvel apprentissage : ${slice.sName} — ${slice.pageLabel}`,
+            subtitle: `${slice.verseHint} (repère indicatif)`,
+            minutes: mins,
+            type: 'learn'
+          });
+          remaining = Math.max(0, remaining - mins);
+          badges.push({ cls: 'learn', text: `Nouv. ${slice.pageLabel}` });
+          nextP.simLearned = fmt(nextP.simLearned + qty);
+
+          rules.forEach(rule => {
+            const offset = Math.max(0, Number(rule.offset) || 0);
+            const reps = Math.max(1, Number(rule.reps) || 1);
+            const srsDate = addDaysStr(cursorDate, offset);
+            virtualSrs.push({
+              type: 'srs',
+              title: `${slice.sName} (${slice.pageLabel}) — ${rule.label} (×${reps})`,
+              subtitle: slice.verseHint,
+              minutes: roundMin(qty * db.settings.repeatMin * reps / 10),
+              date: srsDate,
+              done: false,
+              meta: { pageLabel: slice.pageLabel, stage: rule.label, reps }
+            });
+          });
+        }
+      }
+    }
+
+    const total = items.reduce((s, i) => s + i.minutes, 0);
+    simMap[cursorDate] = {
+      date: cursorDate,
+      avail,
+      mode,
+      dayTarget,
+      items,
+      badges,
+      total,
+      over: total > avail
+    };
+    cursorDate = addDaysStr(cursorDate, 1);
+  }
+  return simMap;
+}
+
+function getDayPlanForDate(dateStr, simMap) {
+  const actuals = db.history.filter(h => h.date === dateStr && h.loggedDirect);
+  if (simMap[dateStr]) {
+    return { ...simMap[dateStr], actuals };
+  }
+  const cfg = getEffectiveDayConfig(dateStr);
+  const pastHistory = db.history.filter(h => h.date === dateStr);
+  const items = pastHistory.map(h => ({ title: h.title, subtitle: '', minutes: h.minutes || 0, type: h.type, done: true }));
+  const badges = [];
+  if (pastHistory.some(h => h.type === 'learn')) badges.push({ cls: 'learn', text: 'Apprentissage' });
+  if (pastHistory.some(h => h.type === 'old')) badges.push({ cls: 'old', text: 'Ancien' });
+  if (pastHistory.some(h => h.type === 'srs')) badges.push({ cls: 'srs', text: 'SRS' });
+  if (pastHistory.some(h => h.type === 'weak')) badges.push({ cls: 'weak', text: 'Renforcement' });
+  return { date: dateStr, avail: cfg.avail, mode: cfg.mode, dayTarget: cfg.newTarget, items, actuals, badges, total: 0, over: false };
+}
+
+function renderPlanning() {
+  const now = new Date();
+  let daysToRender = [];
+  let maxDateStr = today();
+
+  if (planningMode === 'week') {
+    const base = new Date(now.getFullYear(), now.getMonth(), now.getDate() + planningOffset * 7, 12, 0, 0);
+    const monday = new Date(base);
+    monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(d.getDate() + i);
+      daysToRender.push(localDateStr(d));
+    }
+    const fmtShort = dStr => new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short' }).format(parseLocalDate(dStr));
+    $('periodLabel').textContent = `Semaine du ${fmtShort(daysToRender[0])} au ${fmtShort(daysToRender[6])}`;
+    $('planningTitle').textContent = 'Vue Semaine';
+    if (daysToRender[6] > maxDateStr) maxDateStr = daysToRender[6];
+  } else {
+    const targetMonthDate = new Date(now.getFullYear(), now.getMonth() + planningOffset, 1, 12, 0, 0);
+    const year = targetMonthDate.getFullYear();
+    const month = targetMonthDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    for (let d = 1; d <= daysInMonth; d++) {
+      daysToRender.push(localDateStr(new Date(year, month, d, 12, 0, 0)));
+    }
+    $('periodLabel').textContent = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(targetMonthDate);
+    $('planningTitle').textContent = 'Vue Mois';
+    const lastDay = daysToRender[daysToRender.length - 1];
+    if (lastDay > maxDateStr) maxDateStr = lastDay;
+  }
+
+  const simMap = buildPlanningSimulation(maxDateStr);
+  const todayStr = today();
+
+  if (planningMode === 'week') {
+    const names = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+    $('planningBody').innerHTML = `<div class="weekrow">` + daysToRender.map((d, i) => {
+      const e = getDayPlanForDate(d, simMap);
+      const dayNum = Number(d.slice(8));
+      const badgesHtml = e.badges.length
+        ? e.badges.map(b => `<span class="pbadge ${b.cls}">${esc(b.text)}</span>`).join('')
+        : `<span class="small muted" style="display:block;margin-top:6px">—</span>`;
+      return `
+        <div class="daycard ${e.over ? 'over' : ''} ${d === todayStr ? 'today' : ''} ${e.mode === 'review' ? 'review' : ''}" data-day="${d}">
+          <div>
+            <div class="dname">${names[i]}</div>
+            <div class="dnum">${dayNum}</div>
+            ${badgesHtml}
+          </div>
+          <div class="dtime">${e.total > 0 ? fmtTime(e.total) : (e.actuals?.length ? `${e.actuals.length} noté(s)` : 'Détail')}</div>
+        </div>
+      `;
+    }).join('') + `</div>`;
+  } else {
+    const firstDate = parseLocalDate(daysToRender[0]);
+    const lead = (firstDate.getDay() + 6) % 7;
+    let cells = '';
+    for (let i = 0; i < lead; i++) cells += `<div class="calday emptycell"></div>`;
+    daysToRender.forEach(key => {
+      const e = getDayPlanForDate(key, simMap);
+      const d = Number(key.slice(8));
+      const badgesHtml = e.badges.slice(0, 3).map(b => `<span class="pbadge ${b.cls}">${esc(b.text)}</span>`).join('');
+      cells += `
+        <div class="calday ${e.over ? 'over' : ''} ${key === todayStr ? 'today' : ''} ${e.mode === 'review' ? 'review' : ''}" data-day="${key}">
+          <div>
+            <div class="dnum"><span>${d}</span><small>${e.total > 0 ? fmtTime(e.total) : ''}</small></div>
+            ${badgesHtml}
+          </div>
+        </div>
+      `;
+    });
+    $('planningBody').innerHTML = `
+      <div class="calhead"><span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span></div>
+      <div class="cal">${cells}</div>
+    `;
+  }
+
+  $('planningBody').querySelectorAll('[data-day]').forEach(c => {
+    c.onclick = () => openDayDetail(c.dataset.day, simMap);
+  });
+}
+
+function openDayDetail(dateStr, simMap) {
+  const e = getDayPlanForDate(dateStr, simMap || buildPlanningSimulation(dateStr));
+  const isPast = dateStr < today();
+
+  $('modalContent').innerHTML = `
+    <h3 style="text-transform:capitalize;margin-bottom:4px">${formatFrDate(dateStr)}</h3>
+    <p class="muted small" style="margin-top:0">
+      ${e.mode === 'review' ? 'Journée révisions uniquement' : `Objectif : ${fmt(e.dayTarget)} page(s)`}
+      · ${fmtTime(e.total)} prévues sur ${fmtTime(e.avail)} disponibles.
+    </p>
+
+    ${!isPast ? `
+      <div class="fields" style="margin:10px 0;padding:12px;background:var(--bg);border-radius:12px">
+        <div class="field">
+          <label for="modalDayMode">Mode de cette journée</label>
+          <select id="modalDayMode">
+            <option value="normal" ${e.mode === 'normal' ? 'selected' : ''}>Avec nouvel apprentissage</option>
+            <option value="review" ${e.mode === 'review' ? 'selected' : ''}>Révisions uniquement</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="modalDayAvail">Temps disponible (min)</label>
+          <input id="modalDayAvail" type="number" min="0" step="10" value="${e.avail}">
+        </div>
+      </div>
+      <button class="btn soft sm" id="saveModalDay" style="margin-bottom:12px">Mettre à jour ce jour</button>
+    ` : ''}
+
+    <h4>Programme prévu / aperçu</h4>
+    <div class="stack">
+      ${e.items.length ? e.items.map(i => `
+        <div class="task" style="padding:8px 0">
+          <div style="flex:1">
+            <div class="tasktitle">${esc(i.title)}</div>
+            ${i.subtitle ? `<div class="small muted">${esc(i.subtitle)}</div>` : ''}
+          </div>
+          ${i.minutes > 0 ? `<span class="tag">${fmtTime(i.minutes)}</span>` : '<span class="tag ok">Fait</span>'}
+        </div>
+      `).join('') : '<div class="empty" style="padding:10px">Aucune tâche prévue ce jour.</div>'}
+    </div>
+
+    <div class="subbox">
+      <h4 style="margin:0 0 6px">Noter ce que tu as réellement fait</h4>
+      <p class="small muted" style="margin:0 0 10px">Utile si tu as fait plus ou moins que prévu (apprentissage, révision ou renforcement).</p>
+      <div class="fields">
+        <div class="field">
+          <label for="logType">Type de travail</label>
+          <select id="logType">
+            <option value="learn">Nouvel apprentissage</option>
+            <option value="srs">Révision SRS (nouveau)</option>
+            <option value="old">Révision Ancien</option>
+            <option value="weak">Passage à renforcer</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="logPage">Page (1–604)</label>
+          <input id="logPage" type="number" min="1" max="604" value="1">
+        </div>
+      </div>
+      <div class="fields" style="margin-top:8px">
+        <div class="field">
+          <label for="logFrac">Quantité / Fraction</label>
+          <select id="logFrac">
+            <option value="1">1 page</option>
+            <option value="0.5">1/2 page</option>
+            <option value="0.33">1/3 page</option>
+            <option value="0.25">1/4 page</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="logOutcome">Résultat</label>
+          <select id="logOutcome">
+            <option value="ok">Validé</option>
+            <option value="hesitate">Hésitation</option>
+            <option value="fail">Raté (À renforcer)</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions" style="margin-top:10px">
+        <button class="btn primary sm" id="saveActualLog">Enregistrer la réalisation</button>
+      </div>
+      ${e.actuals && e.actuals.length ? `
+        <div style="margin-top:10px;border-top:1px solid var(--line);padding-top:8px">
+          <div class="small muted" style="margin-bottom:4px"><b>Réalisations enregistrées ce jour :</b></div>
+          ${e.actuals.map(a => `<div class="small">• ${esc(a.title)}</div>`).join('')}
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  $('modal').style.display = 'flex';
+
+  const saveDayBtn = $('saveModalDay');
+  if (saveDayBtn) {
+    saveDayBtn.onclick = () => {
+      const newMode = $('modalDayMode').value;
+      const newAvail = Math.max(0, Number($('modalDayAvail').value) || 0);
+      db.dayOverrides[dateStr] = {
+        ...(db.dayOverrides[dateStr] || {}),
+        mode: newMode,
+        available: newAvail
+      };
+      if (dateStr === today()) {
+        $('dayMode').value = newMode;
+        $('available').value = newAvail;
+        if (newMode === 'review') {
+          db.tasks = db.tasks.filter(t => !(t.date === today() && !t.done && t.meta?.dailyGenerated && (t.type === 'learn' || t.type === 'prep')));
+        }
+        plan();
+      }
+      save();
+      $('modal').style.display = 'none';
+      renderPlanning();
+      toast('Journée mise à jour.');
+    };
+  }
+
+  $('saveActualLog').onclick = () => {
+    const lType = $('logType').value;
+    const lPage = Math.max(1, Math.min(604, Number($('logPage').value) || 1));
+    const lFrac = Number($('logFrac').value) || 1;
+    const lOut = $('logOutcome').value;
+    const sName = surahNameByPage(lPage);
+    const vHint = estimateVerseHint(lPage, lFrac, 0);
+    const outTxt = lOut === 'ok' ? 'Validé' : lOut === 'hesitate' ? 'Hésitation' : 'Raté';
+
+    if (lOut === 'fail') {
+      setPageState(lPage, 'weak', 'fragile');
+    } else if (lType === 'old' && lOut === 'ok') {
+      setPageState(lPage, 'known', 'solid');
+    } else if (lType === 'learn' && lOut === 'ok' && pageStatus(lPage) === 'unlearned') {
+      setPageState(lPage, 'learning', 'medium');
+    }
+
+    const mins = lType === 'old'
+      ? roundMin(lFrac * db.settings.oldMin)
+      : roundMin(lFrac * db.settings.learnMin);
+
+    const title = `Réel (${typeName(lType).replace(/^\d+\.\s*/, '')}) : ${sName} p. ${lPage} (${formatFractionLabel(lFrac)}) — ${outTxt} · ${vHint}`;
+    db.history.push({
+      date: dateStr,
+      title,
+      type: lType,
+      outcome: lOut,
+      pagesCount: lOut === 'ok' ? lFrac : 0,
+      minutes: mins,
+      loggedDirect: true
+    });
+
+    save();
+    renderAll();
+    plan();
+    $('modal').style.display = 'none';
+    toast('Réalisation enregistrée dans le suivi et les statistiques.');
+  };
+}
+
+// =========================================================================
+// 9. STATISTIQUES, OBJECTIFS ET RETARDS
+// =========================================================================
+function renderStats() {
+  const learnedSessions = db.history.filter(h => h.type === 'learn' && h.outcome !== 'fail').length;
+  const oldSessions = db.history.filter(h => h.type === 'old' && h.outcome !== 'fail').length;
+  const completedDays = new Set(db.history.filter(h => h.outcome !== 'fail').map(h => h.date)).size;
+  const fragilePagesCount = Object.keys(db.pages).filter(p => pageMastery(Number(p)) === 'fragile' || pageStatus(Number(p)) === 'weak').length;
+
+  $('statsGrid').innerHTML = [
+    ['Pages anciennes', knownPagesCount()],
+    ['Jours réalisés', completedDays],
+    ['Tours anciens complets', db.completedLoops || 0],
+    ['Pages fragiles / renf.', fragilePagesCount]
+  ].map(x => `<div class="card"><div class="stat">${x[1]}</div><div class="statlabel">${x[0]}</div></div>`).join('');
+
+  const todayStr = today();
+  const weekAgo = addDaysStr(todayStr, -7);
+  const monthAgo = addDaysStr(todayStr, -30);
+
+  const pages7d = db.history
+    .filter(h => h.date >= weekAgo && h.date <= todayStr && (h.type === 'learn' || h.type === 'old'))
+    .reduce((s, h) => s + (Number(h.pagesCount) || 0), 0);
+  const pages30d = db.history
+    .filter(h => h.date >= monthAgo && h.date <= todayStr && (h.type === 'learn' || h.type === 'old'))
+    .reduce((s, h) => s + (Number(h.pagesCount) || 0), 0);
+
+  const overdueCount = db.tasks.filter(t => !t.done && t.date < todayStr).length;
+  const wGoal = Number(db.settings.weeklyGoalPages) || 7;
+  const mGoal = Number(db.settings.monthlyGoalPages) || 30;
+
+  $('goalsOverview').innerHTML = `
+    <div class="notice">
+      <b>Objectif hebdomadaire :</b> ${fmt(pages7d)} / ${fmt(wGoal)} page(s) réalisées sur 7 jours.<br>
+      <b>Objectif mensuel :</b> ${fmt(pages30d)} / ${fmt(mGoal)} page(s) réalisées sur 30 jours.<br>
+      <b>Séances d'apprentissage validées :</b> ${learnedSessions} · <b>Séances d'ancien :</b> ${oldSessions}<br>
+      <b>Tâches en retard / reportées :</b> <span style="color:${overdueCount ? 'var(--red)' : 'var(--green)'}"><b>${overdueCount}</b></span>
+    </div>
+  `;
+
+  $('history').innerHTML = db.history.length
+    ? db.history.slice(-25).reverse().map(h => `
+      <div class="task">
+        <div style="flex:1">
+          <div class="tasktitle">${esc(h.title)}</div>
+          <div class="small muted">${formatFrDate(h.date)}</div>
+        </div>
+        <span class="tag">${fmtTime(h.minutes || 0)}</span>
+      </div>
+    `).join('')
+    : '<div class="empty">Aucune activité enregistrée pour le moment.</div>';
+}
+
+// =========================================================================
+// 10. PARAMÈTRES (JOURS PAR DÉFAUT, RÈGLES SRS, SAUVEGARDE / IMPORT)
+// =========================================================================
+function renderWeekdaySettings() {
+  const activeDays = db.settings.learningDays || [0, 1, 2, 3, 4, 5, 6];
+  $('weekdayGrid').innerHTML = WEEKDAYS_META.map(d => {
+    const isLearn = activeDays.includes(d.idx);
+    return `
+      <button type="button" class="wday-btn ${isLearn ? 'learn-on' : 'rev-only'}" data-wday="${d.idx}">
+        <strong>${d.short}</strong>
+        <span>${isLearn ? 'Apprentissage' : 'Révisions seul.'}</span>
+      </button>
+    `;
+  }).join('');
+
+  $('weekdayGrid').querySelectorAll('[data-wday]').forEach(btn => {
+    btn.onclick = () => {
+      const idx = Number(btn.dataset.wday);
+      let list = [...(db.settings.learningDays || [0, 1, 2, 3, 4, 5, 6])];
+      if (list.includes(idx)) list = list.filter(x => x !== idx);
+      else list.push(idx);
+      db.settings.learningDays = list;
+      save();
+      renderWeekdaySettings();
+
+      const todayCfg = getEffectiveDayConfig(today());
+      $('dayMode').value = todayCfg.mode;
+      if (todayCfg.mode === 'review') {
+        db.tasks = db.tasks.filter(t => !(t.date === today() && !t.done && t.meta?.dailyGenerated && (t.type === 'learn' || t.type === 'prep')));
+      }
+      plan();
+      renderPlanning();
+      toast('Jours d\'apprentissage par défaut mis à jour.');
+    };
+  });
+}
+
+function renderSrsRulesEditor() {
+  const rules = getActiveSrsRules();
+  $('srsRulesEditor').innerHTML = rules.map((r, idx) => `
+    <div class="srs-rule-row" data-rule-idx="${idx}">
+      <div class="field">
+        <label class="small muted">Étape</label>
+        <input type="text" class="rule-label" value="${esc(r.label)}" placeholder="ex. J2">
+      </div>
+      <div class="field">
+        <label class="small muted">Échéance (J+)</label>
+        <input type="number" class="rule-offset" min="0" max="365" value="${Number(r.offset) || 0}">
+      </div>
+      <div class="field">
+        <label class="small muted">Répétitions</label>
+        <input type="number" class="rule-reps" min="1" max="100" value="${Number(r.reps) || 1}">
+      </div>
+      <div class="field">
+        <label class="small muted">Rôle</label>
+        <select class="rule-kind">
+          <option value="repeat" ${r.kind === 'repeat' ? 'selected' : ''}>Répétition</option>
+          <option value="check" ${r.kind === 'check' ? 'selected' : ''}>Contrôle</option>
+          <option value="final" ${r.kind === 'final' ? 'selected' : ''}>Test final (→ Ancien)</option>
+        </select>
+      </div>
+      <button type="button" class="pill fail" data-del-rule="${idx}" title="Supprimer cette étape">×</button>
+    </div>
+  `).join('');
+
+  $('srsRulesEditor').querySelectorAll('[data-del-rule]').forEach(btn => {
+    btn.onclick = () => {
+      const rules = getActiveSrsRules();
+      if (rules.length <= 1) {
+        toast('Garde au moins une étape SRS.');
+        return;
+      }
+      rules.splice(Number(btn.dataset.delRule), 1);
+      db.settings.srsRules = rules;
+      save();
+      renderSrsRulesEditor();
+    };
+  });
+}
+
+function collectSrsRulesFromEditor() {
+  const rows = Array.from($('srsRulesEditor').querySelectorAll('.srs-rule-row'));
+  const nextRules = rows.map((row, idx) => ({
+    id: `rule_${idx}_${Date.now()}`,
+    label: row.querySelector('.rule-label').value.trim() || `Étape ${idx + 1}`,
+    offset: Math.max(0, Number(row.querySelector('.rule-offset').value) || 0),
+    reps: Math.max(1, Number(row.querySelector('.rule-reps').value) || 1),
+    kind: row.querySelector('.rule-kind').value || 'repeat'
+  }));
+  nextRules.sort((a, b) => a.offset - b.offset);
+  db.settings.srsRules = nextRules;
+  save();
+  renderSrsRulesEditor();
+  renderPlanning();
+  toast('Règles SRS enregistrées.');
+}
+
+function renderBackupInfo() {
+  $('backupInfo').textContent = db.lastExportDate
+    ? `Dernière exportation JSON : ${formatFrDate(db.lastExportDate)}. Sauvegarde locale automatique active.`
+    : 'Sauvegarde locale automatique active. Pense à exporter un fichier JSON régulièrement.';
+}
+
+function renderAll() {
+  renderPassages();
+  renderSrs();
+  renderWeak();
+  renderOld();
+  renderQuran();
+  renderPlanning();
+  renderStats();
+  renderWeekdaySettings();
+  renderSrsRulesEditor();
+  renderBackupInfo();
+}
+
+function setVal(id, v) { if ($(id)) $(id).value = v; }
+
+function loadSettings() {
+  Object.entries({
+    prepMin: 'prepMin',
+    learnMin: 'learnMin',
+    repeatMin: 'repeatMin',
+    oldMin: 'oldMin',
+    loopDays: 'loopDays',
+    oldTarget: 'oldTarget',
+    defaultTime: 'defaultTime',
+    newTarget: 'newTarget',
+    weeklyGoalPages: 'weeklyGoalPages',
+    monthlyGoalPages: 'monthlyGoalPages'
+  }).forEach(([k, id]) => setVal(id, db.settings[k]));
+
+  const cfg = getEffectiveDayConfig(today());
+  setVal('available', cfg.avail);
+  setVal('dayMode', cfg.mode);
+  setVal('todayNewTarget', cfg.newTarget);
+  document.documentElement.dataset.theme = db.settings.theme || 'light';
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === id));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.page === id));
+  if (id === 'today') plan();
+  if (id === 'planning') renderPlanning();
+  if (id === 'settings') { renderWeekdaySettings(); renderSrsRulesEditor(); renderBackupInfo(); }
+}
+
+function initSurahSelect() {
+  $('passSurah').innerHTML = SURAH.map(s => `<option value="${s[0]}">${s[0]}. ${s[1]} — ${s[2]}</option>`).join('');
+  $('passSurah').onchange = updateSurahRange;
+  $('passStart').oninput = recalcPassPages;
+  $('passEnd').oninput = recalcPassPages;
+  $('passFraction').onchange = recalcPassPages;
+  updateSurahRange();
+}
+
+function updateSurahRange() {
+  const n = Number($('passSurah').value);
+  const s = SURAH.find(item => item[0] === n);
+  const [a, b] = surahRange(n);
+  $('passStart').min = a; $('passStart').max = b;
+  $('passEnd').min = a; $('passEnd').max = b;
+  $('passStart').value = a;
+  $('passEnd').value = b;
+  $('surahRange').textContent = `${s[1]} (${s[2]}) : pages ${a} à ${b} (${b - a + 1} p. · ${s[4]} versets au total).`;
+  recalcPassPages();
+}
+
+function recalcPassPages() {
+  const a = Math.max(1, Math.min(604, Number($('passStart').value) || 1));
+  const b = Math.max(a, Math.min(604, Number($('passEnd').value) || a));
+  const frac = Number($('passFraction').value) || 1;
+  $('passPages').value = b - a + 1;
+  $('verseSlicePreview').textContent = `Repère indicatif sur la 1re fraction (${formatFractionLabel(frac)}) : ${estimateVerseHint(a, frac, 0)}.`;
+}
+
+// =========================================================================
+// 11. ÉVÉNEMENTS GLOBAUX & INITIALISATION
+// =========================================================================
+document.querySelectorAll('.nav button').forEach(b => b.onclick = () => showPage(b.dataset.page));
+document.querySelectorAll('[data-jump]').forEach(b => b.onclick = () => showPage(b.dataset.jump));
+
+$('themeBtn').onclick = () => {
+  db.settings.theme = db.settings.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = db.settings.theme;
+  save();
+};
+
+$('todayDate').textContent = dateLabel();
+
+$('recalc').onclick = () => {
+  db.tasks = db.tasks.filter(t => !(t.date === today() && t.meta?.dailyGenerated && !t.done && (t.type === 'learn' || t.type === 'prep')));
+  plan();
+  toast('Programme recalculé.');
+};
+
+$('addPass').onclick = () => {
+  const n = Number($('passSurah').value);
+  const [minP, maxP] = surahRange(n);
+  const start = Math.max(minP, Math.min(maxP, Number($('passStart').value) || minP));
+  const end = Math.max(start, Math.min(maxP, Number($('passEnd').value) || start));
+  const fraction = Number($('passFraction').value) || 1;
+  const pages = end - start + 1;
+  const sInfo = SURAH.find(item => item[0] === n);
+  const name = `${sInfo[1]} — p. ${start}${end > start ? '–' + end : ''}`;
+
+  db.passages.push({
+    id: crypto.randomUUID(),
+    name,
+    pages,
+    fraction,
+    learnedPages: 0,
+    start,
+    end,
+    surah: n,
+    status: 'queued',
+    created: today()
+  });
+
+  for (let p = start; p <= end; p++) {
+    if (pageStatus(p) === 'unlearned') setPageState(p, 'learning', 'medium');
+  }
+  save();
+  renderAll();
+  plan();
+  toast('Passage ajouté à ta liste d\'apprentissage.');
+};
+
+$('saveDurations').onclick = () => {
+  ['prepMin', 'learnMin', 'repeatMin', 'oldMin'].forEach(k => {
+    db.settings[k] = Math.max(0, Math.round(Number($(k).value) || 0));
+  });
+  save();
+  toast('Durées de référence enregistrées.');
+  plan();
+};
+
+$('saveLoop').onclick = () => {
+  db.settings.loopDays = Math.max(1, Number($('loopDays').value) || 15);
+  db.settings.oldTarget = Math.max(0, Math.round(Number($('oldTarget').value) || 0));
+  save();
+  renderOld();
+  toast('Boucle de révision enregistrée.');
+  plan();
+};
+
+$('addPage').onclick = () => {
+  const a = Number($('manualPage').value), b = Number($('manualPageEnd').value) || a, s = $('manualStatus').value;
+  if (!Number.isInteger(a) || a < 1 || a > 604 || !Number.isInteger(b) || b < a || b > 604) {
+    toast('Entre une plage valide (1 à 604).');
+    return;
+  }
+  for (let p = a; p <= b; p++) {
+    setPageState(p, s);
+    if (s === 'weak') {
+      const exists = db.tasks.some(t => t.type === 'weak' && t.meta?.page === p && !t.done);
+      if (!exists) {
+        db.tasks.push({
+          id: crypto.randomUUID(),
+          type: 'weak',
+          title: `Page ${p} (${surahNameByPage(p)}) — à renforcer`,
+          subtitle: estimateVerseHint(p, 1),
+          shortLabel: `Renf. p. ${p}`,
+          minutes: roundMin(db.settings.oldMin),
+          date: today(),
+          done: false,
+          meta: { page: p }
+        });
+      }
+    }
+  }
+  save();
+  renderAll();
+  plan();
+  toast(`Plage p. ${a}–${b} enregistrée.`);
+};
+
+$('applyRange').onclick = applyRange;
+
+$('saveGeneral').onclick = () => {
+  db.settings.defaultTime = Math.max(0, Number($('defaultTime').value) || 240);
+  db.settings.newTarget = Math.max(0, Number($('newTarget').value) || 1);
+  db.settings.weeklyGoalPages = Math.max(0, Number($('weeklyGoalPages').value) || 7);
+  db.settings.monthlyGoalPages = Math.max(0, Number($('monthlyGoalPages').value) || 30);
+  setVal('todayNewTarget', db.settings.newTarget);
+  save();
+  toast('Paramètres enregistrés.');
+  plan();
+  renderStats();
+};
+
+$('addSrsRule').onclick = () => {
+  const rules = getActiveSrsRules();
+  const last = rules[rules.length - 1] || { offset: 0, reps: 2 };
+  rules.push({
+    id: 'r_' + Date.now(),
+    label: `J${Number(last.offset) + 1}`,
+    offset: Number(last.offset) + 1,
+    reps: Number(last.reps) || 2,
+    kind: 'repeat'
+  });
+  db.settings.srsRules = rules;
+  save();
+  renderSrsRulesEditor();
+};
+
+$('saveSrsRules').onclick = collectSrsRulesFromEditor;
+
+$('resetSrsRules').onclick = () => {
+  db.settings.srsRules = JSON.parse(JSON.stringify(DEFAULT_SRS_RULES));
+  save();
+  renderSrsRulesEditor();
+  renderPlanning();
+  toast('Règles SRS par défaut restaurées.');
+};
+
+$('missDay').onclick = () => {
+  db.tasks.filter(t => !t.done && t.date >= today()).forEach(t => {
+    t.date = addDaysStr(t.date, 1);
+  });
+  db.history.push({
+    date: today(),
+    title: 'Journée manquée — échéances décalées d\'un jour',
+    type: 'miss',
+    outcome: 'postponed',
+    pagesCount: 0,
+    minutes: 0
+  });
+  save();
+  toast('Échéances décalées d’un jour.');
+  renderAll();
+  plan();
+};
+
+$('exportData').onclick = () => {
+  try {
+    db.lastExportDate = today();
+    save();
+    renderBackupInfo();
+    const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sauvegarde-hifz-${today()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('Sauvegarde JSON exportée.');
+  } catch (e) {
+    toast('Impossible d\'exporter la sauvegarde.');
+  }
+};
+
+$('importFile').onchange = async e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  try {
+    const obj = JSON.parse(await f.text());
+    if (!obj || typeof obj !== 'object' || !obj.settings || !Array.isArray(obj.passages)) {
+      throw new Error('Format invalide');
+    }
+    const merged = { ...defaults(), ...obj, settings: { ...defaults().settings, ...obj.settings } };
+    const normPages = {};
+    Object.entries(merged.pages || {}).forEach(([k, v]) => {
+      normPages[k] = normalizePageEntry(v);
+    });
+    merged.pages = normPages;
+    db = merged;
+    save();
+    loadSettings();
+    renderAll();
+    plan();
+    toast('Sauvegarde restaurée avec succès.');
+  } catch (err) {
+    toast('Fichier de sauvegarde invalide.');
+  }
+  e.target.value = '';
+};
+
+$('resetData').onclick = () => {
+  $('modalContent').innerHTML = `
+    <h3>Réinitialiser toutes les données ?</h3>
+    <p class="muted">Cette action effacera tes passages, ton planning et ton historique local. Exporte une sauvegarde avant si besoin.</p>
+    <div class="actions">
+      <button class="btn danger" id="confirmResetStep1">Continuer vers la confirmation</button>
+      <button class="btn soft" id="cancelResetBtn">Annuler</button>
+    </div>
+  `;
+  $('modal').style.display = 'flex';
+  $('cancelResetBtn').onclick = () => { $('modal').style.display = 'none'; };
+  $('confirmResetStep1').onclick = () => {
+    $('modalContent').innerHTML = `
+      <h3>Confirmation finale</h3>
+      <p class="muted">Confirme définitivement la remise à zéro complète de l'application.</p>
+      <div class="actions">
+        <button class="btn danger" id="confirmResetFinal">Oui, effacer définitivement</button>
+        <button class="btn soft" id="cancelResetBtn2">Annuler</button>
+      </div>
+    `;
+    $('cancelResetBtn2').onclick = () => { $('modal').style.display = 'none'; };
+    $('confirmResetFinal').onclick = () => {
+      db = defaults();
+      save();
+      loadSettings();
+      renderAll();
+      plan();
+      $('modal').style.display = 'none';
+      toast('Données réinitialisées.');
+    };
+  };
+};
+
+$('closeModal').onclick = () => { $('modal').style.display = 'none'; };
+$('modal').onclick = e => { if (e.target === $('modal')) $('modal').style.display = 'none'; };
+
+$('viewWeek').onclick = () => {
+  planningMode = 'week';
+  planningOffset = 0;
+  $('viewWeek').classList.add('on');
+  $('viewMonth').classList.remove('on');
+  renderPlanning();
+};
+
+$('viewMonth').onclick = () => {
+  planningMode = 'month';
+  planningOffset = 0;
+  $('viewMonth').classList.add('on');
+  $('viewWeek').classList.remove('on');
+  renderPlanning();
+};
+
+$('todayPeriod').onclick = () => { planningOffset = 0; renderPlanning(); };
+$('prevPeriod').onclick = () => { planningOffset--; renderPlanning(); };
+$('nextPeriod').onclick = () => { planningOffset++; renderPlanning(); };
+
+['available', 'dayMode', 'todayNewTarget'].forEach(id => {
+  $(id).addEventListener('change', () => {
+    db.tasks = db.tasks.filter(t => !(t.date === today() && t.meta?.dailyGenerated && !t.done && (t.type === 'learn' || t.type === 'prep')));
+    plan();
+    renderPlanning();
+  });
+});
+
+loadSettings();
+initSurahSelect();
+renderAll();
+plan();
+</script>
+</body>
+</html>
